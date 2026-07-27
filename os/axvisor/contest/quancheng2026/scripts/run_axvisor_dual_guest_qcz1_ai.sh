@@ -144,6 +144,49 @@ sudo_cmd() {
     sudo "$@"
 }
 
+tap_linux="qcl$$"
+tap_rtos="qcr$$"
+bridge_dev="qcb$$"
+tcpdump_pid=""
+created_tap_links=()
+created_bridge_links=()
+network_cleanup_armed=0
+
+stop_tcpdump() {
+    if [[ -n "${tcpdump_pid}" ]] && kill -0 "${tcpdump_pid}" >/dev/null 2>&1; then
+        sudo_cmd kill -INT "${tcpdump_pid}" >/dev/null 2>&1 || true
+        wait "${tcpdump_pid}" >/dev/null 2>&1 || true
+    fi
+    tcpdump_pid=""
+}
+
+cleanup_network() {
+    local dev
+
+    stop_tcpdump
+    if [[ "${network_cleanup_armed}" -ne 1 ]]; then
+        return 0
+    fi
+
+    for dev in "${created_tap_links[@]}" "${created_bridge_links[@]}"; do
+        sudo_cmd ip link set "${dev}" down >/dev/null 2>&1 || true
+    done
+    for dev in "${created_tap_links[@]}"; do
+        sudo_cmd ip link delete "${dev}" >/dev/null 2>&1 || true
+    done
+    for dev in "${created_bridge_links[@]}"; do
+        sudo_cmd ip link delete "${dev}" type bridge >/dev/null 2>&1 || true
+    done
+}
+
+cleanup_on_exit() {
+    local status=$?
+    set +e
+    cleanup_network
+    return "${status}"
+}
+trap cleanup_on_exit EXIT
+
 compile_static_aarch64() {
     local src="$1"
     local obj="$2"
@@ -319,8 +362,8 @@ vm_configs = []
 EOF
 
 if [[ "${net_mode}" == "tap" ]]; then
-    net_linux_backend="tap,id=net_linux,ifname=tap-qc-linux,script=no,downscript=no"
-    net_rtos_backend="tap,id=net_rtos_e1000,ifname=tap-qc-rtos,script=no,downscript=no"
+    net_linux_backend="tap,id=net_linux,ifname=${tap_linux},script=no,downscript=no"
+    net_rtos_backend="tap,id=net_rtos_e1000,ifname=${tap_rtos},script=no,downscript=no"
 else
     net_linux_backend="hubport,id=net_linux,hubid=42"
     net_rtos_backend="hubport,id=net_rtos_e1000,hubid=42"
@@ -447,38 +490,45 @@ if pgrep -af qemu-system >"${evidence_dir}/preexisting-qemu.txt"; then
     exit 20
 fi
 
-tcpdump_pid=""
 if [[ "${net_mode}" == "tap" ]]; then
     if ! sudo -v; then
         echo "sudo authentication failed; run sudo -v before invoking this script or run from an authenticated terminal." >&2
         exit 21
     fi
 
-    for dev in tap-qc-linux tap-qc-rtos br-qc-dual; do
-        sudo_cmd ip link set "${dev}" down >/dev/null 2>&1 || true
+    for dev in "${tap_linux}" "${tap_rtos}" "${bridge_dev}"; do
+        if ip link show dev "${dev}" >/dev/null 2>&1; then
+            echo "network interface ${dev} already exists; refusing to modify an unknown host resource." >&2
+            exit 22
+        fi
     done
-    sudo_cmd ip link delete tap-qc-linux >/dev/null 2>&1 || true
-    sudo_cmd ip link delete tap-qc-rtos >/dev/null 2>&1 || true
-    sudo_cmd ip link delete br-qc-dual type bridge >/dev/null 2>&1 || true
-    sudo_cmd ip link add br-qc-dual type bridge >/dev/null
-    sudo_cmd ip tuntap add dev tap-qc-linux mode tap user "$(id -un)" >/dev/null
-    sudo_cmd ip tuntap add dev tap-qc-rtos mode tap user "$(id -un)" >/dev/null
-    sudo_cmd ip link set tap-qc-linux master br-qc-dual >/dev/null
-    sudo_cmd ip link set tap-qc-rtos master br-qc-dual >/dev/null
-    sudo_cmd ip link set br-qc-dual up >/dev/null
-    sudo_cmd ip link set tap-qc-linux up >/dev/null
-    sudo_cmd ip link set tap-qc-rtos up >/dev/null
+
+    network_cleanup_armed=1
+    sudo_cmd ip link add "${bridge_dev}" type bridge >/dev/null
+    created_bridge_links+=("${bridge_dev}")
+    sudo_cmd ip tuntap add dev "${tap_linux}" mode tap user "$(id -un)" >/dev/null
+    created_tap_links+=("${tap_linux}")
+    sudo_cmd ip tuntap add dev "${tap_rtos}" mode tap user "$(id -un)" >/dev/null
+    created_tap_links+=("${tap_rtos}")
+    sudo_cmd ip link set "${tap_linux}" master "${bridge_dev}" >/dev/null
+    sudo_cmd ip link set "${tap_rtos}" master "${bridge_dev}" >/dev/null
+    sudo_cmd ip link set "${bridge_dev}" up >/dev/null
+    sudo_cmd ip link set "${tap_linux}" up >/dev/null
+    sudo_cmd ip link set "${tap_rtos}" up >/dev/null
 
     {
         echo "net_mode=tap"
-        ip -br link show dev br-qc-dual || true
-        ip -br link show dev tap-qc-linux || true
-        ip -br link show dev tap-qc-rtos || true
+        echo "bridge=${bridge_dev}"
+        echo "tap_linux=${tap_linux}"
+        echo "tap_rtos=${tap_rtos}"
+        ip -br link show dev "${bridge_dev}" || true
+        ip -br link show dev "${tap_linux}" || true
+        ip -br link show dev "${tap_rtos}" || true
     } | tee "${evidence_dir}/bridge.txt"
 
     if command -v tcpdump >/dev/null 2>&1; then
         sudo_cmd timeout --signal=INT --kill-after=2s "$((qemu_timeout_seconds + 5))" \
-            tcpdump -eni br-qc-dual -vv udp port 4242 \
+            tcpdump -eni "${bridge_dev}" -vv udp port 4242 \
             >"${evidence_dir}/tcpdump.log" 2>&1 &
         tcpdump_pid=$!
     fi
@@ -505,10 +555,7 @@ qemu_status=$?
 set -e
 
 sleep 2
-if [[ -n "${tcpdump_pid}" ]] && kill -0 "${tcpdump_pid}" >/dev/null 2>&1; then
-    sudo_cmd kill -INT "${tcpdump_pid}" >/dev/null 2>&1 || true
-    wait "${tcpdump_pid}" >/dev/null 2>&1 || true
-fi
+stop_tcpdump
 
 {
     echo "qemu_status=${qemu_status}"
