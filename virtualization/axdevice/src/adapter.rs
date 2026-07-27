@@ -25,19 +25,15 @@
 /// implement [`Device`].
 #[cfg(target_arch = "aarch64")]
 pub fn create_vtimer_devices() -> alloc::vec::Vec<alloc::boxed::Box<dyn axdevice_base::Device>> {
-    use arm_vgic::vtimer::{SysCntpCtlEl0, SysCntpTvalEl0, SysCntpctEl0};
+    use arm_vgic::vtimer::new_sysreg_devices;
     use axdevice_base::SysRegDeviceAdapter;
 
+    let (cval, ctl, counter, tval) = new_sysreg_devices();
     let mut devs: alloc::vec::Vec<alloc::boxed::Box<dyn axdevice_base::Device>> =
         alloc::vec::Vec::new();
-    devs.push(alloc::boxed::Box::new(SysRegDeviceAdapter::new(
-        SysCntpCtlEl0::new(),
-    )));
-    devs.push(alloc::boxed::Box::new(SysRegDeviceAdapter::new(
-        SysCntpctEl0::new(),
-    )));
-    devs.push(alloc::boxed::Box::new(SysRegDeviceAdapter::new(
-        SysCntpTvalEl0::new(),
-    )));
+    devs.push(alloc::boxed::Box::new(SysRegDeviceAdapter::new(cval)));
+    devs.push(alloc::boxed::Box::new(SysRegDeviceAdapter::new(ctl)));
+    devs.push(alloc::boxed::Box::new(SysRegDeviceAdapter::new(counter)));
+    devs.push(alloc::boxed::Box::new(SysRegDeviceAdapter::new(tval)));
     devs
 }

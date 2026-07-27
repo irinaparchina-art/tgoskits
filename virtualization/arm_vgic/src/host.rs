@@ -26,8 +26,14 @@ pub trait ArmVgicHostIf {
     /// Current monotonic host time in nanoseconds.
     fn current_time_nanos() -> u64;
 
-    /// Register a timer callback.
-    fn register_timer(deadline: Duration, callback: Box<dyn FnOnce(Duration) + Send + 'static>);
+    /// Register a timer callback at an absolute host deadline.
+    fn register_timer(
+        deadline: Duration,
+        callback: Box<dyn FnOnce(Duration) + Send + 'static>,
+    ) -> usize;
+
+    /// Cancel a previously registered timer callback.
+    fn cancel_timer(token: usize);
 
     /// Read VGICD IIDR from host GIC.
     fn read_vgicd_iidr() -> u32;
@@ -82,8 +88,12 @@ pub(crate) fn current_time_nanos() -> u64 {
 pub(crate) fn register_timer(
     deadline: Duration,
     callback: Box<dyn FnOnce(Duration) + Send + 'static>,
-) {
-    ax_crate_interface::call_interface!(ArmVgicHostIf::register_timer(deadline, callback));
+) -> usize {
+    ax_crate_interface::call_interface!(ArmVgicHostIf::register_timer(deadline, callback))
+}
+
+pub(crate) fn cancel_timer(token: usize) {
+    ax_crate_interface::call_interface!(ArmVgicHostIf::cancel_timer(token));
 }
 
 pub fn read_vgicd_iidr() -> u32 {
