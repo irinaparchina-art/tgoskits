@@ -1,6 +1,6 @@
 # PR Boundary Notes
 
-This note records the current redcola submission boundary for the Qicheng Lab
+This note records the current redcola submission boundary for the Quancheng Lab
 2026 AxVisor contest work. It is meant to keep the deliverable PR reviewable and
 to avoid mixing verified contest artifacts with temporary experiment files.
 
@@ -9,7 +9,7 @@ to avoid mixing verified contest artifacts with temporary experiment files.
 The safe first-stage boundary is:
 
 ```text
-os/axvisor/contest/qicheng2026/
+os/axvisor/contest/quancheng2026/
 ```
 
 This directory contains the contest-facing source, scripts, RTOS patch, protocol
@@ -25,7 +25,7 @@ Current validation for this boundary:
   `.bin`, `.log`, `.tar.gz`, `__pycache__`, or `.pyc` files.
 - Template-regression scan found no stale PowerShell template fragments.
 - Stale 3-run follow-up scan found no "still need to add 3 rounds" wording.
-- `git add --dry-run -- os/axvisor/contest/qicheng2026` would add `38`
+- `git add --dry-run -- os/axvisor/contest/quancheng2026` would add `38`
   files, all under this contest directory; the staged diff is empty before the
   real add.
 - The 2-worker 3-run stability evidence is recorded under
@@ -34,7 +34,7 @@ Current validation for this boundary:
 If making a first-stage commit, use an explicit path:
 
 ```bash
-git add -- os/axvisor/contest/qicheng2026
+git add -- os/axvisor/contest/quancheng2026
 ```
 
 Do not use `git add .` for this repository state.
@@ -205,14 +205,14 @@ Reason:
 
 - These are experiment helpers, generated image metadata, or earlier diagnostic
   scripts. Their useful logic has been condensed into
-  `os/axvisor/contest/qicheng2026/` where possible.
+  `os/axvisor/contest/quancheng2026/` where possible.
 
 ## Recommended Commit Sequence
 
 1. Contest material commit:
 
 ```bash
-git add -- os/axvisor/contest/qicheng2026
+git add -- os/axvisor/contest/quancheng2026
 git diff --cached --stat
 git diff --cached --name-status
 ```

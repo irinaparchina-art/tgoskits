@@ -1,6 +1,6 @@
 # 5-Minute Demo Video Script
 
-This script is for the final Qicheng Lab 2026 AxVisor contest video. It is
+This script is for the final Quancheng Lab 2026 AxVisor contest video. It is
 written for a single-screen recording with two terminals: one terminal runs the
 AxVisor reproduction script, and the other terminal shows the generated report
 and evidence files.
@@ -9,7 +9,7 @@ and evidence files.
 
 Recommended terminal layout:
 
-- Left terminal: run commands from `/home/kali/qc-tgoskits/os/axvisor/contest/qicheng2026`.
+- Left terminal: run commands from `/home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026`.
 - Right terminal: inspect `realtime-report.md`, `realtime-summary.json`,
   `docs/realtime-evaluation.md`, and `results/realtime-comparison.csv`.
 - Keep the command prompt visible so reviewers can see the repository path.
@@ -19,7 +19,7 @@ Recommended terminal layout:
 Main command:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/qicheng2026
+cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh \
   --evidence-dir /tmp/qc_demo_final_evidence \
   --timeout 180 \
@@ -31,7 +31,7 @@ cd /home/kali/qc-tgoskits/os/axvisor/contest/qicheng2026
 Fast fallback command if recording time is tight:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/qicheng2026
+cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh \
   --evidence-dir /tmp/qc_demo_final_evidence \
   --timeout 120 \
@@ -66,7 +66,7 @@ Suggested commands:
 cd /home/kali/qc-tgoskits
 git branch --show-current
 git rev-parse --short HEAD
-sed -n '1,40p' os/axvisor/contest/qicheng2026/README.md
+sed -n '1,40p' os/axvisor/contest/quancheng2026/README.md
 ```
 
 ## 0:30-1:10 Topology And Task Mapping
@@ -82,8 +82,8 @@ Screen:
 Suggested commands:
 
 ```bash
-sed -n '1,80p' os/axvisor/contest/qicheng2026/docs/protocol.md
-sed -n '1,70p' os/axvisor/contest/qicheng2026/docs/realtime-evaluation.md
+sed -n '1,80p' os/axvisor/contest/quancheng2026/docs/protocol.md
+sed -n '1,70p' os/axvisor/contest/quancheng2026/docs/realtime-evaluation.md
 ```
 
 ## 1:10-2:45 Live Reproduction

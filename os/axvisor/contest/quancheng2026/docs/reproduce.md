@@ -17,7 +17,7 @@ From the Zephyr echo-server app:
 
 ```bash
 cd /home/kali/qc-zephyrproject/apps/echo_server_native_zsock_20260726
-patch -p1 < /path/to/tgoskits/os/axvisor/contest/qicheng2026/rtos/zephyr_udp_qc_protocol.patch
+patch -p1 < /path/to/tgoskits/os/axvisor/contest/quancheng2026/rtos/zephyr_udp_qc_protocol.patch
 ```
 
 For the current experiment workspace, the full patched file is also stored as:
@@ -190,7 +190,7 @@ This is the native RTOS baseline for task one. It runs Zephyr's official
 AxVisor:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/qicheng2026
+cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
 ./scripts/run_native_zephyr_latency_baseline.sh
 ```
 
@@ -235,7 +235,7 @@ metrics are parsed, and no QEMU process remains after timeout cleanup.
 The integrated task-two and task-three path is now reproduced by:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/qicheng2026
+cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh
 ```
 

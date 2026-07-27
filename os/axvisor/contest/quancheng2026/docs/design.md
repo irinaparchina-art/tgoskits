@@ -1,7 +1,7 @@
 # Design Document
 
 This document is the reviewer-facing design entry point for the redcola
-Qicheng Lab 2026 AxVisor contest artifact. Detailed protocol, topology,
+Quancheng Lab 2026 AxVisor contest artifact. Detailed protocol, topology,
 reproduction and patch-risk notes are linked from the sections below.
 
 ## Goal
@@ -156,14 +156,14 @@ See `docs/ai-control-evaluation.md`.
 Primary integrated command:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/qicheng2026
+cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh
 ```
 
 Primary native RTOS baseline command:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/qicheng2026
+cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
 ./scripts/run_native_zephyr_latency_baseline.sh
 ```
 

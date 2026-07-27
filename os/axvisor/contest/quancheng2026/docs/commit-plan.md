@@ -1,70 +1,70 @@
 # Commit Plan
 
 This note records the current first-stage commit preflight for the redcola
-Qicheng Lab 2026 AxVisor contest artifacts.
+Quancheng Lab 2026 AxVisor contest artifacts.
 
 ## First-Stage Commit Scope
 
 The first-stage commit should contain only:
 
 ```text
-os/axvisor/contest/qicheng2026/
+os/axvisor/contest/quancheng2026/
 ```
 
 Dry-run command:
 
 ```bash
-git add --dry-run -- os/axvisor/contest/qicheng2026
+git add --dry-run -- os/axvisor/contest/quancheng2026
 ```
 
 Expected dry-run result after adding this note:
 
 - `38` files would be added.
-- All files are under `os/axvisor/contest/qicheng2026/`.
+- All files are under `os/axvisor/contest/quancheng2026/`.
 - No AxVisor core files, image files, temporary scripts, or generated logs would
   be staged by this command.
 
 ## Files To Add
 
 ```text
-os/axvisor/contest/qicheng2026/README.md
-os/axvisor/contest/qicheng2026/docs/ai-control-evaluation.md
-os/axvisor/contest/qicheng2026/docs/core-patch-review.md
-os/axvisor/contest/qicheng2026/docs/design.md
-os/axvisor/contest/qicheng2026/docs/demo-video-script.md
-os/axvisor/contest/qicheng2026/docs/e1000_axvisor.md
-os/axvisor/contest/qicheng2026/docs/final-submission-checklist.md
-os/axvisor/contest/qicheng2026/docs/commit-plan.md
-os/axvisor/contest/qicheng2026/docs/network-topology.md
-os/axvisor/contest/qicheng2026/docs/pr-boundary.md
-os/axvisor/contest/qicheng2026/docs/pr-description.md
-os/axvisor/contest/qicheng2026/docs/protocol.md
-os/axvisor/contest/qicheng2026/docs/realtime-evaluation.md
-os/axvisor/contest/qicheng2026/docs/reproduce.md
-os/axvisor/contest/qicheng2026/docs/scorecard-traceability.md
-os/axvisor/contest/qicheng2026/docs/test-report.md
-os/axvisor/contest/qicheng2026/linux/qc_ai_control_demo.py
-os/axvisor/contest/qicheng2026/linux/qc_dual_guest_qcz1_ai_init.sh
-os/axvisor/contest/qicheng2026/linux/qc_dual_guest_udp_echo_probe.c
-os/axvisor/contest/qicheng2026/linux/qc_periodic_latency_probe.c
-os/axvisor/contest/qicheng2026/linux/qc_qcz1_guest_demo.c
-os/axvisor/contest/qicheng2026/linux/qc_reliable_udp_client.py
-os/axvisor/contest/qicheng2026/results/CURRENT_STATUS_2026-07-26.md
-os/axvisor/contest/qicheng2026/results/realtime-comparison.csv
-os/axvisor/contest/qicheng2026/results/stability/2026-07-27-stress2-3x/stability-summary.csv
-os/axvisor/contest/qicheng2026/results/stability/2026-07-27-stress2-3x/stability-summary.md
-os/axvisor/contest/qicheng2026/rtos/zephyr_ipv4only_udp_mgmt12288.conf
-os/axvisor/contest/qicheng2026/rtos/zephyr_udp_qc_protocol.patch
-os/axvisor/contest/qicheng2026/rtos/zephyr_udp_qc_protocol_udp.c
-os/axvisor/contest/qicheng2026/scripts/analyze_dual_guest_realtime.py
-os/axvisor/contest/qicheng2026/scripts/analyze_zephyr_latency_measure.py
-os/axvisor/contest/qicheng2026/scripts/qc_ai_control_combined_probe.py
-os/axvisor/contest/qicheng2026/scripts/qc_reliable_udp_combined_probe.py
-os/axvisor/contest/qicheng2026/scripts/qc_udp_echo_probe.py
-os/axvisor/contest/qicheng2026/scripts/run_axvisor_dual_guest_qcz1_ai.sh
-os/axvisor/contest/qicheng2026/scripts/run_native_zephyr_latency_baseline.sh
-os/axvisor/contest/qicheng2026/scripts/run_native_zephyr_mgmt_stack_2048_nogdb_validation.sh
-os/axvisor/contest/qicheng2026/scripts/run_native_zephyr_serial_validation_campaign.sh
+os/axvisor/contest/quancheng2026/README.md
+os/axvisor/contest/quancheng2026/docs/ai-control-evaluation.md
+os/axvisor/contest/quancheng2026/docs/core-patch-review.md
+os/axvisor/contest/quancheng2026/docs/design.md
+os/axvisor/contest/quancheng2026/docs/demo-video-script.md
+os/axvisor/contest/quancheng2026/docs/e1000_axvisor.md
+os/axvisor/contest/quancheng2026/docs/final-submission-checklist.md
+os/axvisor/contest/quancheng2026/docs/commit-plan.md
+os/axvisor/contest/quancheng2026/docs/network-topology.md
+os/axvisor/contest/quancheng2026/docs/pr-boundary.md
+os/axvisor/contest/quancheng2026/docs/pr-description.md
+os/axvisor/contest/quancheng2026/docs/protocol.md
+os/axvisor/contest/quancheng2026/docs/realtime-evaluation.md
+os/axvisor/contest/quancheng2026/docs/reproduce.md
+os/axvisor/contest/quancheng2026/docs/scorecard-traceability.md
+os/axvisor/contest/quancheng2026/docs/test-report.md
+os/axvisor/contest/quancheng2026/linux/qc_ai_control_demo.py
+os/axvisor/contest/quancheng2026/linux/qc_dual_guest_qcz1_ai_init.sh
+os/axvisor/contest/quancheng2026/linux/qc_dual_guest_udp_echo_probe.c
+os/axvisor/contest/quancheng2026/linux/qc_periodic_latency_probe.c
+os/axvisor/contest/quancheng2026/linux/qc_qcz1_guest_demo.c
+os/axvisor/contest/quancheng2026/linux/qc_reliable_udp_client.py
+os/axvisor/contest/quancheng2026/results/CURRENT_STATUS_2026-07-26.md
+os/axvisor/contest/quancheng2026/results/realtime-comparison.csv
+os/axvisor/contest/quancheng2026/results/stability/2026-07-27-stress2-3x/stability-summary.csv
+os/axvisor/contest/quancheng2026/results/stability/2026-07-27-stress2-3x/stability-summary.md
+os/axvisor/contest/quancheng2026/rtos/zephyr_ipv4only_udp_mgmt12288.conf
+os/axvisor/contest/quancheng2026/rtos/zephyr_udp_qc_protocol.patch
+os/axvisor/contest/quancheng2026/rtos/zephyr_udp_qc_protocol_udp.c
+os/axvisor/contest/quancheng2026/scripts/analyze_dual_guest_realtime.py
+os/axvisor/contest/quancheng2026/scripts/analyze_zephyr_latency_measure.py
+os/axvisor/contest/quancheng2026/scripts/qc_ai_control_combined_probe.py
+os/axvisor/contest/quancheng2026/scripts/qc_reliable_udp_combined_probe.py
+os/axvisor/contest/quancheng2026/scripts/qc_udp_echo_probe.py
+os/axvisor/contest/quancheng2026/scripts/run_axvisor_dual_guest_qcz1_ai.sh
+os/axvisor/contest/quancheng2026/scripts/run_native_zephyr_latency_baseline.sh
+os/axvisor/contest/quancheng2026/scripts/run_native_zephyr_mgmt_stack_2048_nogdb_validation.sh
+os/axvisor/contest/quancheng2026/scripts/run_native_zephyr_serial_validation_campaign.sh
 ```
 
 ## Files To Keep Out
@@ -120,7 +120,7 @@ commit.
 Run from:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/qicheng2026
+cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
 ```
 
 Checks:
@@ -162,14 +162,14 @@ Only after the checks pass:
 
 ```bash
 cd /home/kali/qc-tgoskits
-git add -- os/axvisor/contest/qicheng2026
+git add -- os/axvisor/contest/quancheng2026
 git diff --cached --stat
 git diff --cached --name-status
 ```
 
 Expected staged paths:
 
-- Every staged path starts with `os/axvisor/contest/qicheng2026/`.
+- Every staged path starts with `os/axvisor/contest/quancheng2026/`.
 - Staged count is `38` files unless this document or another contest document is
   updated again.
 
@@ -179,9 +179,9 @@ committing.
 ## Suggested Commit Message
 
 ```text
-contest: add qicheng2026 AxVisor validation artifacts
+contest: add quancheng2026 AxVisor validation artifacts
 
-Add redcola contest materials for the Qicheng Lab 2026 AxVisor task:
+Add redcola contest materials for the Quancheng Lab 2026 AxVisor task:
 
 - Zephyr IPv4/e1000 RTOS baseline and protocol patch
 - design and test-report entry documents for contest submission review
@@ -206,12 +206,12 @@ Validation:
 ## Suggested PR Summary
 
 ```text
-This PR adds the redcola Qicheng Lab 2026 AxVisor contest artifact directory.
+This PR adds the redcola Quancheng Lab 2026 AxVisor contest artifact directory.
 It collects the Linux/RTOS reliable UDP protocol implementation, Zephyr RTOS
 patch/config, AI control demo, dual-guest reproduction script, realtime and
 communication analyzers, and compact validation summaries.
 
 The contest artifacts are intentionally isolated under
-os/axvisor/contest/qicheng2026/ so they can be reviewed separately from the
+os/axvisor/contest/quancheng2026/ so they can be reviewed separately from the
 AxVisor core scheduler, interrupt, timer, and vCPU experiments.
 ```

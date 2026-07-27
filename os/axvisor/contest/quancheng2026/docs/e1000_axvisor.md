@@ -1,6 +1,6 @@
 # AxVisor Zephyr e1000 Validation
 
-This note records the current e1000 network evidence for the Qicheng Lab 2026 AxVisor contest work.
+This note records the current e1000 network evidence for the Quancheng Lab 2026 AxVisor contest work.
 
 ## Scope
 

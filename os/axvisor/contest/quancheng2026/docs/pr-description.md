@@ -2,8 +2,8 @@
 
 ## Summary
 
-This PR adds the redcola Qicheng Lab 2026 AxVisor contest artifact directory
-under `os/axvisor/contest/qicheng2026/`.
+This PR adds the redcola Quancheng Lab 2026 AxVisor contest artifact directory
+under `os/axvisor/contest/quancheng2026/`.
 
 The directory contains a reviewer-ready mixed-criticality demo package:
 
@@ -54,7 +54,7 @@ python3 -m py_compile scripts/*.py linux/*.py
 bash -n scripts/*.sh linux/*.sh
 artifact scan for images/logs/pyc/tarballs: 0
 git diff --check
-git add --dry-run -- os/axvisor/contest/qicheng2026
+git add --dry-run -- os/axvisor/contest/quancheng2026
 ```
 
 Core worktree revalidation recorded in `docs/core-patch-review.md`:
@@ -70,7 +70,7 @@ CARGO_BUILD_JOBS=1 cargo check -p somehal --features hv --target aarch64-unknown
 
 ## Review Notes
 
-- The first-stage commit should include only `os/axvisor/contest/qicheng2026/`.
+- The first-stage commit should include only `os/axvisor/contest/quancheng2026/`.
 - Generated images, raw logs and large evidence archives are not committed.
 - Raw evidence is referenced by directory path and SHA256 in the included docs.
 - Core AxVisor changes should be reviewed as follow-up commits in the order

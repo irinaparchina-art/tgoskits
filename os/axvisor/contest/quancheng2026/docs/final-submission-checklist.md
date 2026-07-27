@@ -1,7 +1,7 @@
 # Final Submission Checklist
 
 This checklist tracks the remaining steps from the current redcola contest
-artifact state to the final Qicheng Lab submission.
+artifact state to the final Quancheng Lab submission.
 
 ## Current Ready State
 
@@ -22,7 +22,7 @@ artifact state to the final Qicheng Lab submission.
 Run from `/home/kali/qc-tgoskits`:
 
 ```bash
-cd os/axvisor/contest/qicheng2026
+cd os/axvisor/contest/quancheng2026
 find . -type d -name __pycache__ -prune -exec rm -rf {} +
 cache_dir=/tmp/qc_pycompile_cache_$$
 PYTHONPYCACHEPREFIX=$cache_dir python3 -m py_compile scripts/*.py linux/*.py
@@ -32,7 +32,7 @@ find . \( -name '*.img' -o -name '*.qcow2' -o -name '*.iso' -o -name '*.elf' -o 
 cd /home/kali/qc-tgoskits
 git diff --check
 git diff --cached --name-only | wc -l
-git add --dry-run -- os/axvisor/contest/qicheng2026
+git add --dry-run -- os/axvisor/contest/quancheng2026
 ```
 
 Expected result after this checklist is added:
@@ -48,10 +48,10 @@ outside contest dry-run path count: 0
 Only after user authorization:
 
 ```bash
-git add -- os/axvisor/contest/qicheng2026
+git add -- os/axvisor/contest/quancheng2026
 git diff --cached --stat
 git diff --cached --name-status
-git commit -m "contest: add qicheng2026 AxVisor validation artifacts"
+git commit -m "contest: add quancheng2026 AxVisor validation artifacts"
 ```
 
 Do not push in this step unless separately authorized.

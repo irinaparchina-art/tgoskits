@@ -1,6 +1,6 @@
 # Scorecard Traceability Matrix
 
-This document maps the Qicheng Lab 2026 AxVisor contest requirements to the
+This document maps the Quancheng Lab 2026 AxVisor contest requirements to the
 current redcola evidence set. It is written as a reviewer-facing checklist so
 the final PR, weekly report and demo can point to one compact source of truth.
 
@@ -53,7 +53,7 @@ the final PR, weekly report and demo can point to one compact source of truth.
 | --- | --- | --- |
 | Design document | `docs/design.md` plus linked protocol/topology/realtime docs | READY |
 | Test document | `docs/test-report.md` plus `results/realtime-comparison.csv` and stability summary | READY |
-| Source code | `os/axvisor/contest/qicheng2026/` first-stage material; core patches separated for review | READY FOR CONTEST COMMIT |
+| Source code | `os/axvisor/contest/quancheng2026/` first-stage material; core patches separated for review | READY FOR CONTEST COMMIT |
 | Reproduction instructions | `docs/reproduce.md` | READY |
 | Demo video | `docs/demo-video-script.md` | SCRIPT READY; recording still needs user-side capture |
 | PR form | `docs/commit-plan.md` and `docs/pr-boundary.md` | READY AFTER AUTHORIZED COMMIT |
@@ -69,7 +69,7 @@ the final PR, weekly report and demo can point to one compact source of truth.
 
 ## Remaining Actions Before Final Submission
 
-1. User authorizes and creates the first-stage contest-material commit only for `os/axvisor/contest/qicheng2026/`.
+1. User authorizes and creates the first-stage contest-material commit only for `os/axvisor/contest/quancheng2026/`.
 2. Review and commit core patches in the documented order after the contest-material commit is safe.
 3. Record the 5-minute demo video using `docs/demo-video-script.md`.
 4. Push to the personal fork and open/update the PR against the required `dev` branch when the branch is ready.

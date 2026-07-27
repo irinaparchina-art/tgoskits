@@ -1,4 +1,4 @@
-# Qicheng Lab 2026 AxVisor Contest Demo
+# Quancheng Lab 2026 AxVisor Contest Demo
 
 This directory contains the current redcola contest demo artifacts for:
 
@@ -10,7 +10,7 @@ This directory contains the current redcola contest demo artifacts for:
 - AxVisor dual-guest Linux/RTOS QCZ1 and AI closed-loop validation.
 - Reproducible validation scripts and evidence references.
 
-The code is intentionally kept under `os/axvisor/contest/qicheng2026/` so it can be reviewed separately from the AxVisor core scheduler, interrupt, timer and vCPU changes.
+The code is intentionally kept under `os/axvisor/contest/quancheng2026/` so it can be reviewed separately from the AxVisor core scheduler, interrupt, timer and vCPU changes.
 
 ## Current Status
 
@@ -129,7 +129,7 @@ boundary used by the integrated dual-guest run.
 The task-one RTOS baseline uses Zephyr's official `tests/benchmarks/latency_measure` benchmark on native QEMU `qemu_cortex_a53`:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/qicheng2026
+cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
 ./scripts/run_native_zephyr_latency_baseline.sh
 ```
 
@@ -165,7 +165,7 @@ The AI/manual baseline comparison is documented in `docs/ai-control-evaluation.m
 Run:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/qicheng2026
+cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh
 ```
 
@@ -174,7 +174,7 @@ The script prints `result=PASS` only after it sees plain UDP, reliable QCZ1, AI 
 For the 0-worker long-sample baseline used as the no-pressure comparison point:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/qicheng2026
+cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh \
   --evidence-dir /tmp/qc_clean_long_20260727_033600_evidence \
   --timeout 180 \
@@ -188,7 +188,7 @@ This mode collects the same Linux 1 ms periodic probe, RTOS guest 1 ms periodic 
 For the longer stress-backed task-one run with one Linux guest stress worker:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/qicheng2026
+cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh \
   --evidence-dir /tmp/qc_stress_long_20260727_030428_evidence \
   --timeout 150 \
@@ -202,7 +202,7 @@ This mode keeps one Linux guest CPU busy-loop worker active while collecting the
 For a stronger 2-worker pressure run on the 2-vCPU Linux guest:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/qicheng2026
+cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh \
   --evidence-dir /tmp/qc_stress2_long_20260727_033000_evidence \
   --timeout 180 \
@@ -216,7 +216,7 @@ This mode keeps two Linux guest CPU busy-loop workers active during the same int
 For an overcommit stress run with four Linux workers on the 2-vCPU Linux guest:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/qicheng2026
+cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
 CARGO_BUILD_JOBS=1 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh \
   --evidence-dir /tmp/2026-07-27_05-57-22-dual-guest-qcz1-ai \
   --timeout 180 \

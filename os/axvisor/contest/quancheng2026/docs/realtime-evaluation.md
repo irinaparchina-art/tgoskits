@@ -1,7 +1,7 @@
 # Task-One Realtime Evaluation
 
 This note turns the redcola realtime evidence into a reviewer-facing comparison
-for the Qicheng Lab 2026 AxVisor task. It separates the native RTOS primitive
+for the Quancheng Lab 2026 AxVisor task. It separates the native RTOS primitive
 baseline from the AxVisor-hosted dual-guest periodic-task evidence, because the
 two tests measure different layers of the stack.
 

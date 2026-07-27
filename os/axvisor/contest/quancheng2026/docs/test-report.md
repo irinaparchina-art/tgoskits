@@ -1,6 +1,6 @@
 # Test Report
 
-This document is the reviewer-facing test summary for the redcola Qicheng Lab
+This document is the reviewer-facing test summary for the redcola Quancheng Lab
 2026 AxVisor contest artifact. It points to the detailed evidence documents and
 records the key PASS gates.
 
@@ -174,7 +174,7 @@ outside contest dry-run path count: 0
 The first-stage commit boundary remains:
 
 ```text
-os/axvisor/contest/qicheng2026/
+os/axvisor/contest/quancheng2026/
 ```
 
 No AxVisor core files, image files, temporary scripts or generated raw logs

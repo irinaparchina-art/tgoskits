@@ -20,9 +20,9 @@
 | AxVisor 双 Guest QCZ1/AI + 4-worker 超额压力长样本 run | PASS | Linux Guest `2` vCPU；Linux guest busy worker `4`；普通 UDP `20/20 PASS`，RTT mean `7.406 ms`、max `48.008 ms`；QCZ1 `10/10 PASS`，duplicate ACK `2`、重传 `0`；AI `10/10 PASS`，infer mean `113 us`，e2e mean `8.140 ms`、max `39.642 ms`；Linux 周期探针 `10000` samples、`1 ms` period，mean lateness `2.966 ms`、p99 `41.868 ms`、max `52.850 ms`；RTOS 周期探针 `1000` samples、`1 ms` busy_wait，mean lateness `0.080 ms`、p99 `1.256 ms`、max `6.179 ms`；tcpdump `88` 包、kernel drop `0`；`analysis_result=PASS`；证据包 SHA256 `9d8d94ac85222f73fa4fb5249cbc94ca52a1b0cb2c656c5d8105069da4bcb12f` | `network/2026-07-27-contest-script-dual-guest-qcz1-ai-stress4-long-pass` |
 | AxVisor 双 Guest QCZ1/AI + 2-worker 压力 3 轮稳定性 run | PASS | 同一 2-worker 压力配置连续 `3/3 PASS`；每轮普通 UDP `20/20`、QCZ1 `10/10`、AI `10/10`、tcpdump kernel drop `0`、bad scan 为空；Linux 周期 p99 三轮范围 `4.301-16.140 ms`；RTOS 周期 p99 三轮范围 `0.864-0.985 ms`；AI e2e max 三轮范围 `2.230-24.792 ms`；三轮证据包 SHA256 分别为 `fbe83e24d41cc3cc1c9172656de3212e4e044625c0837f6ba7c8ec3f941ddb26`、`6437349e481dd3b5282abe27a34085e4a0d26b214cd7a88478ff7532446f7a16`、`38aac4038f06ae1731125cea46e6afce0b18d0cc5f0845ef7a562676a8cc97f5` | `network/2026-07-27-contest-script-dual-guest-qcz1-ai-stress2-3x-pass` |
 | AxVisor 双 Guest QCZ1/AI 最终演示彩排 run | PASS | 短演示配置实测 `result=PASS`；Linux Guest `2` vCPU；普通 UDP `20/20 PASS`，RTT mean `3.705 ms`、max `31.001 ms`；QCZ1 `10/10 PASS`，duplicate ACK `2`、重传 `0`；AI `10/10 PASS`，infer mean `66 us`，e2e mean `1.563 ms`、max `1.754 ms`；Linux 周期探针 `2000` samples，p99 `1.823 ms`、max `2.873 ms`；RTOS 周期探针 `1000` samples，p99 `1.427 ms`、max `7.008 ms`；tcpdump `88` 包、kernel drop `0`；证据包 SHA256 `064e37dca1aec17cc6e7e3169aa80ebb4987a3920978073e5e9cf825b0618eb7` | `contest-package/2026-07-27-demo-rehearsal-latest-evidence` |
-| 任务一实时性正式对比材料 | PASS | 已把 Zephyr 原生 latency baseline、AxVisor 双 Guest 0/1/2/4-worker 长样本、2-worker 3 轮稳定性结果整理为评审口径文档和 CSV；文档说明测量范围、CPU/vCPU 放置、平台差异、延迟指标和可复现命令入口。 | `os/axvisor/contest/qicheng2026/docs/realtime-evaluation.md`，`os/axvisor/contest/qicheng2026/results/realtime-comparison.csv` |
-| AxVisor 核心改动拆分审查 | PASS | 已把当前核心工作树拆成 4 个 patch 候选：VM config + vTimer、GIC EOI mode、bounded diagnostics、axbuild image helper；交付文档明确第一阶段只提交 contest 目录，核心功能补丁单独审查。 | `os/axvisor/contest/qicheng2026/docs/core-patch-review.md`，`contest-package/2026-07-27-core-patch-candidates/` |
-| 5 分钟演示视频脚本 | PASS | 已按比赛演示要求整理录屏布局、主复现命令、备用回放流程、逐分钟讲稿、需要捕获的 PASS marker 和结果解读重点。 | `os/axvisor/contest/qicheng2026/docs/demo-video-script.md` |
+| 任务一实时性正式对比材料 | PASS | 已把 Zephyr 原生 latency baseline、AxVisor 双 Guest 0/1/2/4-worker 长样本、2-worker 3 轮稳定性结果整理为评审口径文档和 CSV；文档说明测量范围、CPU/vCPU 放置、平台差异、延迟指标和可复现命令入口。 | `os/axvisor/contest/quancheng2026/docs/realtime-evaluation.md`，`os/axvisor/contest/quancheng2026/results/realtime-comparison.csv` |
+| AxVisor 核心改动拆分审查 | PASS | 已把当前核心工作树拆成 4 个 patch 候选：VM config + vTimer、GIC EOI mode、bounded diagnostics、axbuild image helper；交付文档明确第一阶段只提交 contest 目录，核心功能补丁单独审查。 | `os/axvisor/contest/quancheng2026/docs/core-patch-review.md`，`contest-package/2026-07-27-core-patch-candidates/` |
+| 5 分钟演示视频脚本 | PASS | 已按比赛演示要求整理录屏布局、主复现命令、备用回放流程、逐分钟讲稿、需要捕获的 PASS marker 和结果解读重点。 | `os/axvisor/contest/quancheng2026/docs/demo-video-script.md` |
 
 ## 新增排查记录
 
@@ -36,7 +36,7 @@
 
 远端 Kali 仓库：
 
-`/home/kali/qc-tgoskits/os/axvisor/contest/qicheng2026`
+`/home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026`
 
 当前内容包括：
 
@@ -160,13 +160,13 @@ tgoskits 当前仍有较多未审查核心改动，不能直接 `git add .` 或�
 
 目前可安全单独审查的交付边界是：
 
-`os/axvisor/contest/qicheng2026/`
+`os/axvisor/contest/quancheng2026/`
 
 ## 距离一等奖/擂主还差的关键工作
 
 1. 整理 AxVisor 核心改动，明确哪些是必须提交的调度/中断/定时器/网络相关修正，并把未完成实验、镜像、临时文件排除在 PR 外。
 2. 按 `docs/demo-video-script.md` 实录 5 分钟演示视频。
-3. 根据赛事提交方式决定是否先提交 `os/axvisor/contest/qicheng2026/` 的 38 个交付文件，再单独审查核心补丁。
+3. 根据赛事提交方式决定是否先提交 `os/axvisor/contest/quancheng2026/` 的 38 个交付文件，再单独审查核心补丁。
 
 ## 下一步建议
 
@@ -432,7 +432,7 @@ done
 正式运行命令：
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/qicheng2026
+cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
 CARGO_BUILD_JOBS=1 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh \
   --evidence-dir /tmp/2026-07-27_05-57-22-dual-guest-qcz1-ai \
   --timeout 180 \

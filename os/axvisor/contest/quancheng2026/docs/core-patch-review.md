@@ -7,7 +7,7 @@ timer, and tooling changes can be reviewed as smaller follow-up patches.
 
 ## Recommended Order
 
-1. Commit `os/axvisor/contest/qicheng2026/` only.
+1. Commit `os/axvisor/contest/quancheng2026/` only.
 2. Review and commit the functional VM config and vTimer patch.
 3. Review the GIC EOI-mode change as a small interrupt-path patch.
 4. Keep bounded diagnostics optional; include them only if reviewer evidence or

@@ -151,7 +151,7 @@ def request_status(sock: socket.socket, peer: tuple[str, int], seq: int, timeout
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Reliable UDP control client for the Qicheng AxVisor RTOS guest demo.")
+    parser = argparse.ArgumentParser(description="Reliable UDP control client for the Quancheng AxVisor RTOS guest demo.")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=14242)
     parser.add_argument("--count", type=int, default=20)
