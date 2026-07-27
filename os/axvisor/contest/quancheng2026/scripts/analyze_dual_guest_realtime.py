@@ -23,7 +23,7 @@ DUP_RE = re.compile(
     r".*?duplicate=(\d+).*?latency_us=(\d+)"
 )
 AI_RE = re.compile(
-    r"QC_AI_SEQ=(\d+).*?infer_us=(\d+).*?e2e_us=(\d+)"
+    r"QC_AI(?:_SEQ=|.*?\bSEQ=)(\d+).*?infer_us=(\d+).*?e2e_us=(\d+)"
     r".*?output_milli=(-?\d+).*?result=([A-Z]+)"
 )
 TCPDUMP_SUMMARY_RE = re.compile(r"(\d+) packets (captured|received by filter|dropped by kernel)")

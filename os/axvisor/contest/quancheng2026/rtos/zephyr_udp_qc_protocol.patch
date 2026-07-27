@@ -1,21 +1,12 @@
 --- /home/kali/qc-zephyrproject/apps/echo_server_native_zsock_20260726/src/udp.c.bak-20260726-2124	2026-07-26 10:18:52.106929837 +0800
-+++ rtos/zephyr_udp_qc_protocol_udp.c	2026-07-27 02:40:07.424812658 +0800
-@@ -12,7 +12,11 @@
- 
- #include <zephyr/kernel.h>
- #include <errno.h>
++++ rtos/zephyr_udp_qc_protocol_udp.c	2026-07-27 03:14:30.539507506 +0800
+@@ -14,0 +15,3 @@
 +#include <limits.h>
 +#include <stdbool.h>
 +#include <stdint.h>
- #include <stdio.h>
+@@ -15,0 +19 @@
 +#include <string.h>
- 
- #include <zephyr/posix/sys/socket.h>
- #include <zephyr/posix/unistd.h>
-@@ -27,6 +31,440 @@
- static void process_udp4(void);
- static void process_udp6(void);
- 
+@@ -29,0 +34,434 @@
 +#define QC_PROTO_MAGIC 0x51435a31u /* "QCZ1" */
 +#define QC_PROTO_VERSION 1u
 +#define QC_PROTO_HEADER_LEN 28u
@@ -450,24 +441,12 @@
 +	printk("QC_RTOS_PERIODIC_RESULT=PASS\n");
 +}
 +
- K_THREAD_DEFINE(udp4_thread_id, STACK_SIZE,
- 		process_udp4, NULL, NULL, NULL,
- 		THREAD_PRIORITY,
-@@ -37,6 +475,10 @@
- 		THREAD_PRIORITY,
- 		IS_ENABLED(CONFIG_USERSPACE) ? K_USER : 0, -1);
- 
+@@ -39,0 +478,4 @@
 +K_THREAD_DEFINE(qc_rtos_periodic_thread_id, STACK_SIZE,
 +		qc_rtos_periodic_probe, NULL, NULL, NULL,
 +		QC_RTOS_PERIODIC_THREAD_PRIORITY, 0, -1);
 +
- static int start_udp_proto(struct data *data, struct sockaddr *bind_addr,
- 			   socklen_t bind_addrlen)
- {
-@@ -134,6 +576,21 @@
- 			atomic_add(&data->udp.bytes_received, received);
- 		}
- 
+@@ -136,0 +579,15 @@
 +		ret = qc_process_packet(data, data->udp.recv_buffer, received,
 +					&client_addr, client_addr_len);
 +		if (ret > 0) {
@@ -483,19 +462,10 @@
 +			break;
 +		}
 +
- 		ret = sendto(data->udp.sock, data->udp.recv_buffer, received, 0,
- 			     &client_addr, client_addr_len);
- 		if (ret < 0) {
-@@ -226,6 +683,12 @@
- 
- void start_udp(void)
- {
+@@ -228,0 +686,6 @@
 +	if (!qc_rtos_periodic_started) {
 +		qc_rtos_periodic_started = true;
 +		k_thread_name_set(qc_rtos_periodic_thread_id, "qc-rtos");
 +		k_thread_start(qc_rtos_periodic_thread_id);
 +	}
 +
- 	if (IS_ENABLED(CONFIG_NET_IPV6)) {
- #if defined(CONFIG_USERSPACE)
- 		k_mem_domain_add_thread(&app_domain, udp6_thread_id);

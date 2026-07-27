@@ -93,4 +93,3 @@ Submit or link:
 - `docs/scorecard-traceability.md`.
 - Demo video.
 - Latest source/documentation package SHA256.
-

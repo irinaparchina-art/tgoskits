@@ -75,4 +75,3 @@ CARGO_BUILD_JOBS=1 cargo check -p somehal --features hv --target aarch64-unknown
 - Raw evidence is referenced by directory path and SHA256 in the included docs.
 - Core AxVisor changes should be reviewed as follow-up commits in the order
   documented in `docs/core-patch-review.md`.
-

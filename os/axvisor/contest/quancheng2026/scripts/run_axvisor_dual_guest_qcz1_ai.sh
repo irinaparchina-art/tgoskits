@@ -8,7 +8,6 @@ repo="$(cd "${script_dir}/../../../../.." && pwd)"
 stamp="$(date +%Y-%m-%d_%H-%M-%S)-dual-guest-qcz1-ai"
 evidence_dir="/tmp/${stamp}"
 qemu_timeout_seconds=95
-sudo_password="${SUDO_PASSWORD:-kali}"
 prepare_only=0
 linux_rt_samples=2000
 linux_stress_workers=0
@@ -22,7 +21,6 @@ Options:
   --repo PATH              tgoskits repository root.
   --evidence-dir PATH      Output evidence directory.
   --timeout SECONDS        AxVisor/QEMU timeout. Default: 95.
-  --sudo-password VALUE    Password for sudo -S bridge/tcpdump setup.
   --linux-rt-samples N     Linux guest 1 ms periodic samples. Default: 2000.
   --linux-stress-workers N Linux guest CPU busy-loop workers. Default: 0.
   --linux-stress-seconds N Linux guest stress duration, 0 means until probes finish. Default: 0.
@@ -46,10 +44,6 @@ while [[ $# -gt 0 ]]; do
             ;;
         --timeout)
             qemu_timeout_seconds="$2"
-            shift 2
-            ;;
-        --sudo-password)
-            sudo_password="$2"
             shift 2
             ;;
         --linux-rt-samples)
@@ -133,7 +127,7 @@ run_fsck() {
 }
 
 sudo_cmd() {
-    printf '%s\n' "${sudo_password}" | sudo -S "$@"
+    sudo "$@"
 }
 
 compile_static_aarch64() {
@@ -428,6 +422,11 @@ if pgrep -af qemu-system >"${evidence_dir}/preexisting-qemu.txt"; then
     echo "preexisting_qemu=YES"
     cat "${evidence_dir}/preexisting-qemu.txt"
     exit 20
+fi
+
+if ! sudo -v; then
+    echo "sudo authentication failed; run sudo -v before invoking this script or run from an authenticated terminal." >&2
+    exit 21
 fi
 
 for dev in tap-qc-linux tap-qc-rtos br-qc-dual; do
