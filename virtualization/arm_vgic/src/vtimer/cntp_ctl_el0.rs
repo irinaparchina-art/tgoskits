@@ -12,12 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+extern crate alloc;
+
+use alloc::sync::Arc;
+
 use aarch64_sysreg::SystemRegType;
 use axdevice_base::{
     AccessWidth, BaseDeviceOps, DeviceAddrRange, DeviceResult, EmuDeviceType, SysRegAddr,
     SysRegAddrRange,
 };
-use log::info;
+
+use super::cntp_timer::CntpTimerState;
 
 impl BaseDeviceOps<SysRegAddrRange> for SysCntpCtlEl0 {
     fn emu_type(&self) -> EmuDeviceType {
@@ -36,16 +41,16 @@ impl BaseDeviceOps<SysRegAddrRange> for SysCntpCtlEl0 {
         _addr: <SysRegAddrRange as DeviceAddrRange>::Addr,
         _width: AccessWidth,
     ) -> DeviceResult<usize> {
-        Ok(0)
+        Ok(self.state.read_ctl() as usize)
     }
 
     fn handle_write(
         &self,
-        addr: <SysRegAddrRange as DeviceAddrRange>::Addr,
+        _addr: <SysRegAddrRange as DeviceAddrRange>::Addr,
         _width: AccessWidth,
         val: usize,
     ) -> DeviceResult {
-        info!("Write to emulator register: {addr:?}, value: {val}");
+        self.state.write_ctl(val as u32);
         Ok(())
     }
 }
@@ -53,16 +58,23 @@ impl BaseDeviceOps<SysRegAddrRange> for SysCntpCtlEl0 {
 /// System register emulation for CNTP_CTL_EL0.
 ///
 /// Provides virtualization support for the physical timer control register.
-#[derive(Default)]
 pub struct SysCntpCtlEl0 {
-    // Fields
+    state: Arc<CntpTimerState>,
 }
 
 impl SysCntpCtlEl0 {
     /// Creates a new CNTP_CTL_EL0 register emulator.
     pub fn new() -> Self {
-        Self {
-            // Initialize fields
-        }
+        Self::from_state(Arc::new(CntpTimerState::new()))
+    }
+
+    pub(super) fn from_state(state: Arc<CntpTimerState>) -> Self {
+        Self { state }
+    }
+}
+
+impl Default for SysCntpCtlEl0 {
+    fn default() -> Self {
+        Self::new()
     }
 }
