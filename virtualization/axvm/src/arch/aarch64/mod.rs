@@ -421,8 +421,20 @@ impl ArmVgicHostIf for ArmVgicHostIfImpl {
         default_host().cpu_count()
     }
 
+    fn current_vm_id() -> usize {
+        crate::current_vm_id().expect("current AArch64 VM is not set")
+    }
+
     fn current_vcpu_id() -> usize {
         crate::current_vcpu_id().expect("current AArch64 vCPU is not set")
+    }
+
+    fn queue_virtual_interrupt(vm_id: usize, vcpu_id: usize, vector: u8) {
+        if let Err(err) = crate::runtime::vcpus::queue_interrupt(vm_id, vcpu_id, vector as usize) {
+            warn!(
+                "failed to queue VM[{vm_id}] vCPU[{vcpu_id}] virtual interrupt {vector}: {err:?}"
+            );
+        }
     }
 
     fn current_time_nanos() -> u64 {
