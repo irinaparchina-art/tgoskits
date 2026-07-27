@@ -429,8 +429,15 @@ impl ArmVgicHostIf for ArmVgicHostIfImpl {
         default_host().monotonic_time().as_nanos() as u64
     }
 
-    fn register_timer(deadline: Duration, callback: Box<dyn FnOnce(Duration) + Send + 'static>) {
-        let _ = crate::timer::register_timer(deadline.as_nanos() as u64, callback);
+    fn register_timer(
+        deadline: Duration,
+        callback: Box<dyn FnOnce(Duration) + Send + 'static>,
+    ) -> usize {
+        crate::timer::register_timer(deadline.as_nanos() as u64, callback)
+    }
+
+    fn cancel_timer(token: usize) {
+        crate::timer::cancel_timer(token);
     }
 
     fn read_vgicd_iidr() -> u32 {
