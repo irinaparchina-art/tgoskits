@@ -12,6 +12,7 @@ prepare_only=0
 linux_rt_samples=2000
 linux_stress_workers=0
 linux_stress_seconds=0
+net_mode="tap"
 
 usage() {
     cat <<'EOF'
@@ -24,6 +25,7 @@ Options:
   --linux-rt-samples N     Linux guest 1 ms periodic samples. Default: 2000.
   --linux-stress-workers N Linux guest CPU busy-loop workers. Default: 0.
   --linux-stress-seconds N Linux guest stress duration, 0 means until probes finish. Default: 0.
+  --net-mode MODE          Network backend: tap or hub. Default: tap.
   --prepare-only           Build rootfs/configs but do not run QEMU.
   -h, --help               Show this help.
 
@@ -58,6 +60,10 @@ while [[ $# -gt 0 ]]; do
             linux_stress_seconds="$2"
             shift 2
             ;;
+        --net-mode)
+            net_mode="$2"
+            shift 2
+            ;;
         --prepare-only)
             prepare_only=1
             shift
@@ -84,6 +90,14 @@ if [[ "${linux_rt_samples}" -lt 1 ]]; then
     echo "linux_rt_samples must be at least 1" >&2
     exit 3
 fi
+case "${net_mode}" in
+    tap|hub)
+        ;;
+    *)
+        echo "net_mode must be tap or hub, got: ${net_mode}" >&2
+        exit 3
+        ;;
+esac
 
 repo="$(cd "${repo}" && pwd)"
 axvisor="${repo}/os/axvisor"
@@ -177,6 +191,7 @@ echo "evidence_dir=${evidence_dir}"
 echo "linux_rt_samples=${linux_rt_samples}"
 echo "linux_stress_workers=${linux_stress_workers}"
 echo "linux_stress_seconds=${linux_stress_seconds}"
+echo "net_mode=${net_mode}"
 
 for required in \
     clang \
@@ -303,6 +318,14 @@ target = "aarch64-unknown-none-softfloat"
 vm_configs = []
 EOF
 
+if [[ "${net_mode}" == "tap" ]]; then
+    net_linux_backend="tap,id=net_linux,ifname=tap-qc-linux,script=no,downscript=no"
+    net_rtos_backend="tap,id=net_rtos_e1000,ifname=tap-qc-rtos,script=no,downscript=no"
+else
+    net_linux_backend="hubport,id=net_linux,hubid=42"
+    net_rtos_backend="hubport,id=net_rtos_e1000,hubid=42"
+fi
+
 cat >"${config_dir}/runtime.toml" <<EOF
 args = [
   "-nographic",
@@ -327,11 +350,11 @@ args = [
   "-m",
   "2g",
   "-netdev",
-  "tap,id=net_linux,ifname=tap-qc-linux,script=no,downscript=no",
+  "${net_linux_backend}",
   "-device",
   "virtio-net-device,netdev=net_linux,mac=52:54:00:12:34:10,bus=virtio-mmio-bus.31,csum=off,gso=off,ctrl_guest_offloads=off,guest_csum=off,guest_tso4=off,guest_tso6=off,guest_ecn=off,guest_ufo=off,guest_uso4=off,guest_uso6=off,host_tso4=off,host_tso6=off,host_ecn=off,host_ufo=off,host_uso=off,mrg_rxbuf=off",
   "-netdev",
-  "tap,id=net_rtos_e1000,ifname=tap-qc-rtos,script=no,downscript=no",
+  "${net_rtos_backend}",
   "-device",
   "e1000,netdev=net_rtos_e1000,mac=52:54:00:12:34:20,addr=0x1",
 ]
@@ -424,38 +447,48 @@ if pgrep -af qemu-system >"${evidence_dir}/preexisting-qemu.txt"; then
     exit 20
 fi
 
-if ! sudo -v; then
-    echo "sudo authentication failed; run sudo -v before invoking this script or run from an authenticated terminal." >&2
-    exit 21
-fi
-
-for dev in tap-qc-linux tap-qc-rtos br-qc-dual; do
-    sudo_cmd ip link set "${dev}" down >/dev/null 2>&1 || true
-done
-sudo_cmd ip link delete tap-qc-linux >/dev/null 2>&1 || true
-sudo_cmd ip link delete tap-qc-rtos >/dev/null 2>&1 || true
-sudo_cmd ip link delete br-qc-dual type bridge >/dev/null 2>&1 || true
-sudo_cmd ip link add br-qc-dual type bridge >/dev/null
-sudo_cmd ip tuntap add dev tap-qc-linux mode tap user "$(id -un)" >/dev/null
-sudo_cmd ip tuntap add dev tap-qc-rtos mode tap user "$(id -un)" >/dev/null
-sudo_cmd ip link set tap-qc-linux master br-qc-dual >/dev/null
-sudo_cmd ip link set tap-qc-rtos master br-qc-dual >/dev/null
-sudo_cmd ip link set br-qc-dual up >/dev/null
-sudo_cmd ip link set tap-qc-linux up >/dev/null
-sudo_cmd ip link set tap-qc-rtos up >/dev/null
-
-{
-    ip -br link show dev br-qc-dual || true
-    ip -br link show dev tap-qc-linux || true
-    ip -br link show dev tap-qc-rtos || true
-} | tee "${evidence_dir}/bridge.txt"
-
 tcpdump_pid=""
-if command -v tcpdump >/dev/null 2>&1; then
-    sudo_cmd timeout --signal=INT --kill-after=2s "$((qemu_timeout_seconds + 5))" \
-        tcpdump -eni br-qc-dual -vv udp port 4242 \
-        >"${evidence_dir}/tcpdump.log" 2>&1 &
-    tcpdump_pid=$!
+if [[ "${net_mode}" == "tap" ]]; then
+    if ! sudo -v; then
+        echo "sudo authentication failed; run sudo -v before invoking this script or run from an authenticated terminal." >&2
+        exit 21
+    fi
+
+    for dev in tap-qc-linux tap-qc-rtos br-qc-dual; do
+        sudo_cmd ip link set "${dev}" down >/dev/null 2>&1 || true
+    done
+    sudo_cmd ip link delete tap-qc-linux >/dev/null 2>&1 || true
+    sudo_cmd ip link delete tap-qc-rtos >/dev/null 2>&1 || true
+    sudo_cmd ip link delete br-qc-dual type bridge >/dev/null 2>&1 || true
+    sudo_cmd ip link add br-qc-dual type bridge >/dev/null
+    sudo_cmd ip tuntap add dev tap-qc-linux mode tap user "$(id -un)" >/dev/null
+    sudo_cmd ip tuntap add dev tap-qc-rtos mode tap user "$(id -un)" >/dev/null
+    sudo_cmd ip link set tap-qc-linux master br-qc-dual >/dev/null
+    sudo_cmd ip link set tap-qc-rtos master br-qc-dual >/dev/null
+    sudo_cmd ip link set br-qc-dual up >/dev/null
+    sudo_cmd ip link set tap-qc-linux up >/dev/null
+    sudo_cmd ip link set tap-qc-rtos up >/dev/null
+
+    {
+        echo "net_mode=tap"
+        ip -br link show dev br-qc-dual || true
+        ip -br link show dev tap-qc-linux || true
+        ip -br link show dev tap-qc-rtos || true
+    } | tee "${evidence_dir}/bridge.txt"
+
+    if command -v tcpdump >/dev/null 2>&1; then
+        sudo_cmd timeout --signal=INT --kill-after=2s "$((qemu_timeout_seconds + 5))" \
+            tcpdump -eni br-qc-dual -vv udp port 4242 \
+            >"${evidence_dir}/tcpdump.log" 2>&1 &
+        tcpdump_pid=$!
+    fi
+else
+    {
+        echo "net_mode=hub"
+        echo "qemu_netdev=hubport,hubid=42"
+        echo "bridge=SKIPPED"
+        echo "tcpdump=SKIPPED"
+    } | tee "${evidence_dir}/bridge.txt"
 fi
 
 set +e
@@ -479,6 +512,7 @@ fi
 
 {
     echo "qemu_status=${qemu_status}"
+    echo "net_mode=${net_mode}"
     echo "--- qc markers ---"
     grep -aE 'QC_|Received and replied|Created VM|Boot hart|Failed to assign|panic|ERROR|WARN' "${evidence_dir}/qemu.log" \
         | grep -av 'QC_SYNC_DIAG' \

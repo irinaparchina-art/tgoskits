@@ -171,6 +171,39 @@ dry-run staged path count: 38
 outside contest dry-run path count: 0
 ```
 
+Current PR-head runtime proof, using the same dual-guest runner in unprivileged
+QEMU hub mode:
+
+```text
+command:
+  os/axvisor/contest/quancheng2026/scripts/run_axvisor_dual_guest_qcz1_ai.sh
+  --repo /home/kali/qc-tgoskits-pr1703-head
+  --evidence-dir /home/kali/qc-evidence/pr1703-current-head-hub-runtime-2026-07-27_18-42-39
+  --timeout 140
+  --linux-rt-samples 2000
+  --net-mode hub
+qemu_status=0
+net_mode=hub
+QC_RTOS_PERIODIC_RESULT=PASS
+QC_RT_PERIODIC_RESULT=PASS
+QC_DUAL_GUEST_UDP_ECHO_RESULT=PASS
+QC_QCZ1_RELIABLE_RESULT=PASS
+QC_AI_CONTROL_RESULT=PASS
+QC_QCZ1_GUEST_DEMO=PASS
+QC_DUAL_GUEST_LINUX_INIT=PASS
+result=PASS
+QC_UDP_SUCCESSES=20
+QC_QCZ1_LATENCY_MEAN_US=2547
+QC_AI_E2E_MEAN_US=1671
+QC_AI_E2E_MAX_US=2415
+```
+
+This current-head run uses QEMU `hubport` to avoid requiring privileged TAP
+and bridge setup in the remote validation session. It validates the same
+Linux/RTOS guest IP path, QCZ1 application protocol, AI control loop, and guest
+marker sequence. TAP bridge state and tcpdump packet-capture counters are not
+claimed for this unprivileged current-head run.
+
 The first-stage commit boundary remains:
 
 ```text
