@@ -177,9 +177,9 @@ QEMU hub mode:
 ```text
 command:
   os/axvisor/contest/quancheng2026/scripts/run_axvisor_dual_guest_qcz1_ai.sh
-  --repo /home/kali/qc-tgoskits-pr1703-head
-  --evidence-dir /home/kali/qc-evidence/pr1703-current-head-hub-runtime-2026-07-27_18-42-39
-  --timeout 140
+  --repo /path/to/tgoskits
+  --evidence-dir /home/kali/qc-evidence/qc_pr1703_current_local_hub_recheck_20260728_035343
+  --timeout 150
   --linux-rt-samples 2000
   --net-mode hub
 qemu_status=0
@@ -192,10 +192,11 @@ QC_AI_CONTROL_RESULT=PASS
 QC_QCZ1_GUEST_DEMO=PASS
 QC_DUAL_GUEST_LINUX_INIT=PASS
 result=PASS
+analysis_result=PASS
 QC_UDP_SUCCESSES=20
-QC_QCZ1_LATENCY_MEAN_US=2547
-QC_AI_E2E_MEAN_US=1671
-QC_AI_E2E_MAX_US=2415
+QC_QCZ1_LATENCY_MEAN_US=1997
+QC_AI_E2E_MEAN_US=3046
+QC_AI_E2E_MAX_US=7409
 ```
 
 This current-head run uses QEMU `hubport` to avoid requiring privileged TAP

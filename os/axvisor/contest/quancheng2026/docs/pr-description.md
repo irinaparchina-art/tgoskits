@@ -32,7 +32,7 @@ Task One, realtime:
 
 Task Two, inter-guest communication:
 
-- The main data path is IPv4/UDP over `br-qc-dual`.
+- The main data path is IPv4/UDP over a per-run isolated TAP/bridge network.
 - Linux guest uses `192.0.2.10`; Zephyr RTOS guest uses `192.0.2.20`.
 - QCZ1 provides versioned, checksummed, sequenced request/response frames over
   UDP with timeout/retry handling.
@@ -63,7 +63,8 @@ Core worktree revalidation recorded in `docs/core-patch-review.md`:
 cargo fmt --check -p arm_vcpu -p arm_vgic -p axvmconfig -p axvm -p axbuild
 CARGO_BUILD_JOBS=1 cargo test -p axvmconfig -p axvm -p arm_vgic --lib
 CARGO_BUILD_JOBS=1 cargo test -p arm_vcpu --lib
-CARGO_BUILD_JOBS=1 cargo test -p axbuild command_parses_image_pull --lib
+CARGO_BUILD_JOBS=1 cargo test -p axbuild image::tests::parses_pull_by_arch --lib
+CARGO_BUILD_JOBS=1 cargo test -p axbuild image::storage::tests::pull_rootfs_image_returns_extracted_rootfs_file --lib
 cargo fmt --check -p somehal
 CARGO_BUILD_JOBS=1 cargo check -p somehal --features hv --target aarch64-unknown-none-softfloat
 ```

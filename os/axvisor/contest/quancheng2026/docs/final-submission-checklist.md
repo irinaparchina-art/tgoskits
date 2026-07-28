@@ -19,17 +19,18 @@ artifact state to the final Quancheng Lab submission.
 
 ## Before First Commit
 
-Run from `/home/kali/qc-tgoskits`:
+Run from the repository root:
 
 ```bash
-cd os/axvisor/contest/quancheng2026
+REPO=/path/to/tgoskits
+cd "${REPO}/os/axvisor/contest/quancheng2026"
 find . -type d -name __pycache__ -prune -exec rm -rf {} +
 cache_dir=/tmp/qc_pycompile_cache_$$
 PYTHONPYCACHEPREFIX=$cache_dir python3 -m py_compile scripts/*.py linux/*.py
 rm -rf $cache_dir
 bash -n scripts/*.sh linux/*.sh
 find . \( -name '*.img' -o -name '*.qcow2' -o -name '*.iso' -o -name '*.elf' -o -name '*.o' -o -name '*.bin' -o -name '__pycache__' -o -name '*.pyc' -o -name '*.log' -o -name '*.tar.gz' \) -print | sort
-cd /home/kali/qc-tgoskits
+cd "${REPO}"
 git diff --check
 git diff --cached --name-only | wc -l
 git add --dry-run -- os/axvisor/contest/quancheng2026

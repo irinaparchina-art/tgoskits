@@ -63,7 +63,7 @@ Observed validation:
 cargo test -p axvmconfig -p axvm -p arm_vgic --lib
 ```
 
-passed with `axvmconfig 18/18`, `axvm 103/103`, and `arm_vgic 5/5`.
+passed with `axvmconfig 18/18`, `axvm 110/110`, and `arm_vgic 5/5`.
 
 ## Patch Candidate 2: GIC EOI Mode
 
@@ -189,26 +189,29 @@ Recommendation:
 Observed validation:
 
 ```text
-cargo test -p axbuild command_parses_image_pull --lib
+CARGO_BUILD_JOBS=1 cargo test -p axbuild image::tests::parses_pull_by_arch --lib
+CARGO_BUILD_JOBS=1 cargo test -p axbuild image::storage::tests::pull_rootfs_image_returns_extracted_rootfs_file --lib
 ```
 
-passed.
+Both targeted axbuild tests passed (`1/1` each).
 
 ## Current Worktree Revalidation
 
-The current uncommitted core worktree was rechecked on 2026-07-27 after the
+The current uncommitted core worktree was rechecked on 2026-07-28 after the
 contest-material package reached the 38-file boundary.
 
 ```text
 cargo fmt --check -p arm_vcpu -p arm_vgic -p axvmconfig -p axvm -p axbuild: PASS
 CARGO_BUILD_JOBS=1 cargo test -p axvmconfig -p axvm -p arm_vgic --lib: PASS
   arm_vgic: 5/5
-  axvm: 103/103
+  axvm: 110/110
   axvmconfig: 18/18
 CARGO_BUILD_JOBS=1 cargo test -p arm_vcpu --lib: PASS
   arm_vcpu: 0/0 host-side tests
-CARGO_BUILD_JOBS=1 cargo test -p axbuild command_parses_image_pull --lib: PASS
-  axbuild filtered test: 1/1
+CARGO_BUILD_JOBS=1 cargo test -p axbuild image::tests::parses_pull_by_arch --lib: PASS
+  axbuild targeted test: 1/1
+CARGO_BUILD_JOBS=1 cargo test -p axbuild image::storage::tests::pull_rootfs_image_returns_extracted_rootfs_file --lib: PASS
+  axbuild targeted test: 1/1
 cargo fmt --check -p somehal: PASS
 CARGO_BUILD_JOBS=1 cargo check -p somehal --features hv --target aarch64-unknown-none-softfloat: PASS
 ```

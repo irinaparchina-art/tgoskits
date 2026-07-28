@@ -15,9 +15,9 @@ Linux guest, 2 vCPU, pCPU 1-2
   MAC : 52:54:00:12:34:10
   role: plain UDP probe, QCZ1 reliable UDP client, AI controller
 
-br-qc-dual
-  tap-qc-linux attached to Linux guest
-  tap-qc-rtos  attached to RTOS guest
+per-run isolated bridge, recorded as bridge= in bridge.txt
+  per-run Linux TAP, recorded as tap_linux=, attached to Linux guest
+  per-run RTOS TAP, recorded as tap_rtos=, attached to RTOS guest
   no host IP address required for the contest data path
 
 Zephyr RTOS guest, 1 vCPU, pCPU 0
@@ -49,19 +49,23 @@ incoming packet. No static route is needed beyond the guest-local connected
 
 ## Access Control and Isolation
 
-The bridge is created only for the experiment and is removed by the cleanup
-path in the script. It is not connected to the Kali management interface and it
-does not bridge to the VMware LAN. That keeps the contest data path isolated
-from the SSH control path used by the host operator.
+The TAP bridge is created only for the current experiment run and is removed by
+the cleanup path in the script. Its host object names are generated per run,
+recorded in `bridge.txt`, and are not assumed to be fixed names. The script
+refuses to modify a pre-existing interface with the generated name and the exit
+trap removes only resources that were successfully created by the current run.
+The bridge is not connected to the Kali management interface and it does not
+bridge to the VMware LAN. That keeps the contest data path isolated from the SSH
+control path used by the host operator.
 
 The current run does not rely on iptables, nftables or a host firewall rule to
 permit the contest traffic. The access boundary is instead structural:
 
-- only the two TAP devices are attached to `br-qc-dual`;
+- only the two per-run TAP devices are attached to the per-run bridge;
 - the RTOS service listens only on UDP port `4242` inside the RTOS guest;
 - the Linux guest client sends to `192.0.2.20:4242`;
 - tcpdump is used for observation, not forwarding or filtering;
-- the bridge has no NAT rule and no routed uplink.
+- the per-run bridge has no NAT rule and no routed uplink.
 
 For the single-guest e1000 smoke test only, QEMU user networking forwards
 `127.0.0.1:14243` to `192.0.2.1:4242`. That is not the integrated dual-guest

@@ -10,7 +10,7 @@ The demo builds an intelligent industrial-control style mixed system on
 AxVisor:
 
 ```text
-Linux/Starry-style guest
+Linux guest
   -> AI inference and control client
   -> IPv4/UDP QCZ1 protocol
   -> Zephyr RTOS guest
@@ -24,10 +24,10 @@ while the communication and AI-control paths are active.
 
 ```text
 Kali host
-  cargo xtask qemu
-  br-qc-dual
-    tap-qc-linux  -> Linux guest virtio-net
-    tap-qc-rtos   -> Zephyr RTOS guest e1000
+  cargo xtask axvisor qemu
+  per-run isolated bridge, recorded as bridge= in bridge.txt
+    per-run Linux TAP, recorded as tap_linux= -> Linux guest virtio-net
+    per-run RTOS TAP, recorded as tap_rtos=  -> Zephyr RTOS guest e1000
 
 Linux guest
   2 vCPU, pCPU 1-2
@@ -116,9 +116,12 @@ See `docs/protocol.md` for the frame format.
 
 ## Isolation Design
 
-The integrated dual-guest run keeps the contest data path inside `br-qc-dual`.
-The bridge contains only the Linux and RTOS TAP devices and has no NAT or routed
-uplink. The host SSH/control path is separate from the guest data path.
+The integrated dual-guest run keeps the contest data path inside an isolated
+per-run TAP/bridge network. In TAP mode, the runner generates unique host
+object names from the current process, for example `qcb<PID>`, `qcl<PID>` and
+`qcr<PID>`, records the exact names in `bridge.txt`, and removes only the
+resources created by that run. The bridge has no NAT or routed uplink. The host
+SSH/control path is separate from the guest data path.
 
 The Linux guest includes a `gppt-gicd` device mapping so Linux GIC distributor
 accesses do not disturb the Zephyr/e1000 interrupt route. The RTOS guest uses a
@@ -153,17 +156,19 @@ See `docs/ai-control-evaluation.md`.
 
 ## Reproducibility
 
-Primary integrated command:
+Primary integrated command after preparing the runtime artifacts listed in `docs/reproduce.md`:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
+REPO=/path/to/tgoskits
+cd "${REPO}/os/axvisor/contest/quancheng2026"
 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh
 ```
 
 Primary native RTOS baseline command:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
+REPO=/path/to/tgoskits
+cd "${REPO}/os/axvisor/contest/quancheng2026"
 ./scripts/run_native_zephyr_latency_baseline.sh
 ```
 

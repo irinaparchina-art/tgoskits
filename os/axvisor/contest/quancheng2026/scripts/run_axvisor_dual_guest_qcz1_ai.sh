@@ -31,6 +31,12 @@ Options:
 
 The script reproduces the AxVisor dual-guest contest path:
 Linux guest 192.0.2.10 <-> Zephyr RTOS guest 192.0.2.20 over IPv4/UDP.
+
+Required runtime artifacts, relative to --repo:
+  rootfs: tmp/axbuild/rootfs/rootfs-aarch64-alpine.img/rootfs-aarch64-alpine.img
+  linux:  os/axvisor/tmp/images/qemu-aarch64/linux/linux-qemu
+  rtos:   os/axvisor/tmp/images/qemu-aarch64/zephyr-e1000-0x90000000-qcz1/zephyr.bin
+  dtb:    os/axvisor/tmp/configs/2026-07-24_qemu-aarch64-host-reserve-zephyr-0x90000000.dtb
 EOF
 }
 
@@ -103,8 +109,7 @@ repo="$(cd "${repo}" && pwd)"
 axvisor="${repo}/os/axvisor"
 contest_dir="${axvisor}/contest/quancheng2026"
 rootfs_cache="${repo}/tmp/axbuild/rootfs"
-rootfs_archive="${rootfs_cache}/rootfs-aarch64-alpine.img.tar.xz"
-expected_archive_sha256="d97245a69c60f7a0b6f9d510259f79d873e3fe6277264c936c0b26418d1c3f19"
+rootfs_image_source="${rootfs_cache}/rootfs-aarch64-alpine.img/rootfs-aarch64-alpine.img"
 linux_kernel="${axvisor}/tmp/images/qemu-aarch64/linux/linux-qemu"
 zephyr_bin="${axvisor}/tmp/images/qemu-aarch64/zephyr-e1000-0x90000000-qcz1/zephyr.bin"
 host_dtb="${axvisor}/tmp/configs/2026-07-24_qemu-aarch64-host-reserve-zephyr-0x90000000.dtb"
@@ -241,7 +246,6 @@ for required in \
     readelf \
     debugfs \
     e2fsck \
-    tar \
     timeout \
     cargo
 do
@@ -259,8 +263,21 @@ if [[ -z "${lld}" || ! -x "${lld}" ]]; then
     exit 11
 fi
 
+if [[ ! -f "${rootfs_image_source}" ]]; then
+    echo "rootfs_image_missing=${rootfs_image_source}"
+    echo "action=cargo xtask axvisor image pull --arch aarch64 -S tmp/axbuild/rootfs"
+    (cd "${repo}" && cargo xtask axvisor image pull --arch aarch64 -S tmp/axbuild/rootfs)
+fi
+
+if [[ ! -f "${rootfs_image_source}" ]]; then
+    echo "missing_required_path=${rootfs_image_source}" >&2
+    echo "hint=run 'cargo xtask axvisor image pull --arch aarch64 -S tmp/axbuild/rootfs' from the repository root, then retry" >&2
+    exit 12
+fi
+rootfs_source_kind="image-manager"
+rootfs_source_path="${rootfs_image_source}"
+
 for required_path in \
-    "${rootfs_archive}" \
     "${linux_kernel}" \
     "${zephyr_bin}" \
     "${host_dtb}" \
@@ -271,16 +288,20 @@ for required_path in \
 do
     if [[ ! -f "${required_path}" ]]; then
         echo "missing_required_path=${required_path}" >&2
+        echo "hint=prepare the rootfs, Linux kernel, Zephyr RTOS binary and host DTB paths documented in docs/reproduce.md" >&2
         exit 12
     fi
 done
 
-archive_sha256="$(sha256sum "${rootfs_archive}" | awk '{print $1}')"
-echo "rootfs_archive_sha256=${archive_sha256}"
-if [[ "${archive_sha256}" != "${expected_archive_sha256}" ]]; then
-    echo "rootfs archive checksum mismatch" >&2
-    exit 13
-fi
+rootfs_source_sha256="$(sha256sum "${rootfs_source_path}" | awk '{print $1}')"
+echo "rootfs_source=${rootfs_source_path}"
+echo "rootfs_source_kind=${rootfs_source_kind}"
+echo "rootfs_source_sha256=${rootfs_source_sha256}"
+echo "--- runtime artifacts ---"
+sha256sum \
+    "${rootfs_source_path}" \
+    "${linux_kernel}" "${zephyr_bin}" "${host_dtb}" \
+    | tee "${evidence_dir}/runtime-artifact-sha256.txt"
 
 {
     IFS= read -r first_line || true
@@ -307,9 +328,9 @@ sha256sum \
     | tee "${evidence_dir}/artifact-sha256.txt"
 
 rm -f "${rootfs_img}"
-tar -xJf "${rootfs_archive}" -C "${rootfs_dir}"
+cp "${rootfs_image_source}" "${rootfs_img}"
 if [[ ! -f "${rootfs_img}" ]]; then
-    echo "rootfs extraction did not create ${rootfs_img}" >&2
+    echo "rootfs preparation did not create ${rootfs_img}" >&2
     exit 14
 fi
 
@@ -543,8 +564,8 @@ fi
 
 set +e
 (
-    cd "${axvisor}"
-    timeout --signal=INT --kill-after=10s "${qemu_timeout_seconds}" cargo xtask qemu \
+    cd "${repo}"
+    timeout --signal=INT --kill-after=10s "${qemu_timeout_seconds}" cargo xtask axvisor qemu \
         --config "${config_dir}/qemu-aarch64.toml" \
         --qemu-config "${config_dir}/runtime.toml" \
         --vmconfigs "${config_dir}/zephyr-e1000-qcz1-vm.toml" \

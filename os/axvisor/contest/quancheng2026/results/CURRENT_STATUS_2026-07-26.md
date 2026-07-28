@@ -1,4 +1,4 @@
-﻿# 当前攻关状态（2026-07-26）
+# 当前攻关状态（2026-07-26）
 
 ## 已经坐实的证据
 
@@ -11,7 +11,7 @@
 | AxVisor + Zephyr e1000 IPv4/UDP | PASS | strict probe `20/20 PASS`，RTT mean `1.070 ms`，p95 `1.569 ms`，QEMU monitor 确认 `model=e1000` | `network/2026-07-25-axvisor-zephyr-e1000-strict20-pass` |
 | AxVisor + Zephyr e1000 + QCZ1/AI | PASS | 可靠 UDP `10/10 PASS`，duplicate ACK `2/2`，AI control `10/10 PASS`，端到端 mean `0.883 ms`，QEMU monitor 确认 PCI `8086:100e` | `network/2026-07-26-axvisor-zephyr-e1000-qcz1-reliable-ai-pass` |
 | AxVisor Linux/Zephyr 双 Guest + QCZ1/AI Guest 内闭环 | PASS | Linux Guest 双 vCPU 启动；Zephyr RTOS Guest e1000 服务端；普通 UDP `6/6 PASS`；QCZ1 可靠 UDP `10/10 PASS`；duplicate ACK `2/2`；AI control `10/10 PASS`；AI e2e mean `2.078 ms`，max `3.201 ms`；最终 `QC_DUAL_GUEST_LINUX_INIT=PASS` | `network/2026-07-27-dual-linux-zephyr-qcz1-ai-guest-pass` |
-| AxVisor 双 Guest QCZ1/AI 一键复现实验 | PASS | 交付脚本 `run_axvisor_dual_guest_qcz1_ai.sh` 实测通过；Linux Guest `2` vCPU；普通 UDP `20/20 PASS`；QCZ1 可靠 UDP `10/10 PASS`，duplicate ACK `2`，重传 `0`；AI control `10/10 PASS`，AI e2e mean `1.666 ms`，max `2.155 ms`；tcpdump `88` 包、kernel drop `0`；已生成 `realtime-report.md`/`realtime-summary.json`；最终 `result=PASS` | `network/2026-07-27-contest-script-dual-guest-qcz1-ai-pass` |
+| AxVisor 双 Guest QCZ1/AI 准备运行时工件后的复现实验 | PASS | 交付脚本 `run_axvisor_dual_guest_qcz1_ai.sh` 实测通过；Linux Guest `2` vCPU；普通 UDP `20/20 PASS`；QCZ1 可靠 UDP `10/10 PASS`，duplicate ACK `2`，重传 `0`；AI control `10/10 PASS`，AI e2e mean `1.666 ms`，max `2.155 ms`；tcpdump `88` 包、kernel drop `0`；已生成 `realtime-report.md`/`realtime-summary.json`；最终 `result=PASS` | `network/2026-07-27-contest-script-dual-guest-qcz1-ai-pass` |
 | AxVisor 双 Guest QCZ1/AI + Linux 周期探针 clean run | PASS | Linux Guest `2` vCPU；PL011/virtio IRQ `[1,31,47]`；bootargs `noirqdebug`；普通 UDP `20/20 PASS`，RTT mean `3.218 ms`、max `22.945 ms`；QCZ1 `10/10 PASS`，duplicate ACK `2`、重传 `0`；AI `10/10 PASS`，infer mean `50 us`，e2e mean `1.819 ms`、max `2.560 ms`；周期探针 `2000` samples、`1 ms` period，mean lateness `0.838 ms`、p99 `2.524 ms`、max `4.200 ms`；tcpdump `88` 包、kernel drop `0`；bad IRQ 扫描为空；证据包 SHA256 `c04eacb0370af75bc0d0c115e90a2de819f4c27d05d384440f4abf4df77ff01e` | `network/2026-07-27-contest-script-dual-guest-qcz1-ai-rt-noirqdebug-pass` |
 | AxVisor 双 Guest QCZ1/AI + Linux/RTOS 双侧周期探针 clean run | PASS | Linux Guest `2` vCPU；RTOS Guest Zephyr/e1000；普通 UDP `20/20 PASS`，RTT mean `2.943 ms`、max `19.039 ms`；QCZ1 `10/10 PASS`，duplicate ACK `2`、重传 `0`；AI `10/10 PASS`，infer mean `66 us`，e2e mean `2.186 ms`、max `3.389 ms`；Linux 周期探针 `2000` samples、`1 ms` period，mean lateness `0.829 ms`、p99 `4.455 ms`、max `10.167 ms`；RTOS 周期探针 `1000` samples、`1 ms` busy_wait，mean lateness `0.110 ms`、p99 `0.887 ms`、max `5.156 ms`；tcpdump `88` 包、kernel drop `0`；`analysis_result=PASS`；证据包 SHA256 `a7963eda86c71d8cc475cb4b1af70b29a81eef76b4a06af26fc806d1c302e5c6` | `network/2026-07-27-contest-script-dual-guest-qcz1-ai-rtos-periodic-pass` |
 | AxVisor 双 Guest QCZ1/AI + 0-worker 长样本实时性对照 run | PASS | Linux Guest `2` vCPU；Linux guest busy worker `0`；普通 UDP `20/20 PASS`，RTT mean `7.113 ms`、max `50.686 ms`；QCZ1 `10/10 PASS`，duplicate ACK `2`、重传 `0`；AI `10/10 PASS`，infer mean `60 us`，e2e mean `1.668 ms`、max `1.925 ms`；Linux 周期探针 `10000` samples、`1 ms` period，mean lateness `0.859 ms`、p99 `2.789 ms`、max `12.764 ms`；RTOS 周期探针 `1000` samples、`1 ms` busy_wait，mean lateness `0.088 ms`、p99 `0.613 ms`、max `5.329 ms`；tcpdump `88` 包、kernel drop `0`；`analysis_result=PASS`；bad scan `PASS`；证据包 SHA256 `b3a6dcc0503f7d2fae4add93c05c20aaad0a33874ac924bf1b9b26b9a7295ddd` | `network/2026-07-27-contest-script-dual-guest-qcz1-ai-clean-long-pass` |
@@ -36,7 +36,7 @@
 
 远端 Kali 仓库：
 
-`/home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026`
+`${REPO}/os/axvisor/contest/quancheng2026`
 
 当前内容包括：
 
@@ -89,9 +89,10 @@
 - `run_axvisor_dual_guest_qcz1_ai.sh --timeout 180 --linux-rt-samples 10000 --linux-stress-workers 2`：`PASS`
 - `analyze_dual_guest_realtime.py --fail-on-missing`：`PASS`
 - `cargo fmt --check -p arm_vcpu -p arm_vgic -p axvmconfig -p axvm -p axbuild`：`PASS`
-- `cargo test -p axvmconfig -p axvm -p arm_vgic --lib`：`PASS`（`arm_vgic 5/5`，`axvm 103/103`，`axvmconfig 18/18`）
+- `cargo test -p axvmconfig -p axvm -p arm_vgic --lib`：`PASS`（`arm_vgic 5/5`，`axvm 110/110`，`axvmconfig 18/18`）
 - `cargo test -p arm_vcpu --lib`：`PASS`
-- `cargo test -p axbuild command_parses_image_pull --lib`：`PASS`
+- `CARGO_BUILD_JOBS=1 cargo test -p axbuild image::tests::parses_pull_by_arch --lib`：`PASS`
+- `CARGO_BUILD_JOBS=1 cargo test -p axbuild image::storage::tests::pull_rootfs_image_returns_extracted_rootfs_file --lib`：`PASS`
 
 本地交付目录快照（源码、文档、演示脚本、正式实时性对比表、核心 patch 审查说明和小型稳定性摘要，不含镜像和原始日志包）：
 
@@ -114,7 +115,7 @@ SHA256：
 - `core-03-bounded-diagnostics.patch`：`3e3993ebf1a869517afd8044741c47726f07a2694eb15e8457b7d23e1bf60eb7`
 - `core-04-axbuild-image-helper.patch`：`117c1cb719ddc60e7943ce48c6bb630e54d60d7db55c30c961bd59d2decd4655`
 
-一键复现实验证据：
+准备运行时工件后的复现实验证据：
 
 `network/2026-07-27-contest-script-dual-guest-qcz1-ai-rtos-periodic-pass`
 
@@ -170,7 +171,7 @@ tgoskits 当前仍有较多未审查核心改动，不能直接 `git add .` 或�
 
 ## 下一步建议
 
-优先推进 PR 审查和核心改动拆分；双 Guest 通信、QCZ1 可靠协议、AI 闭环、Linux 周期探针、RTOS Guest 周期探针、0-worker 对照、1-worker、2-worker 和 4-worker 压力/长样本实时性 run 都已经完成一键复现实验脚本和证据沉淀，2-worker 压力也已经完成 3 轮稳定性复核，任务一正式对比材料已整理到 `docs/realtime-evaluation.md` 和 `results/realtime-comparison.csv`，演示视频脚本已整理到 `docs/demo-video-script.md`。后续重点是核心改动边界审查、最终交付包和实录演示视频。
+优先推进 PR 审查和核心改动拆分；双 Guest 通信、QCZ1 可靠协议、AI 闭环、Linux 周期探针、RTOS Guest 周期探针、0-worker 对照、1-worker、2-worker 和 4-worker 压力/长样本实时性 run 都已经完成准备运行时工件后的复现实验脚本和证据沉淀，2-worker 压力也已经完成 3 轮稳定性复核，任务一正式对比材料已整理到 `docs/realtime-evaluation.md` 和 `results/realtime-comparison.csv`，演示视频脚本已整理到 `docs/demo-video-script.md`。后续重点是核心改动边界审查、最终交付包和实录演示视频。
 
 当前已经有：
 
@@ -178,7 +179,7 @@ tgoskits 当前仍有较多未审查核心改动，不能直接 `git add .` 或�
 - `QCZ1` 可靠 UDP 和 AI 控制闭环已经在 AxVisor-hosted Zephyr e1000 通路跑通；
 - 可靠 UDP 协议和 AI 控制闭环在 Zephyr RTOS 侧能稳定运行；
 - Linux 侧客户端和 AI demo 已经打包；
-- Linux Guest 与 RTOS Guest 双侧 1 ms 周期探针已经进入一键复现脚本；
+- Linux Guest 与 RTOS Guest 双侧 1 ms 周期探针已经进入复现脚本；
 - Linux Guest CPU 压力负载和 `10000` 样本周期探针已经在 0-worker、1-worker、2-worker、4-worker 四档下跑通并归档；
 - 2-worker 压力配置已经完成连续 3 轮稳定性复跑，三轮均 PASS。
 
@@ -224,7 +225,7 @@ tgoskits 当前仍有较多未审查核心改动，不能直接 `git add .` 或�
 
 ## 2026-07-27 新增：AxVisor-hosted RTOS Guest 周期探针 PASS
 
-最新一键复现实验已把 RTOS Guest 内部 1 ms 周期探针加入 Zephyr/e1000 客户机，并与 Linux Guest 周期探针、普通 UDP、QCZ1 可靠协议、AI 控制闭环一起纳入 `run_axvisor_dual_guest_qcz1_ai.sh` 的 PASS 判定。
+最新准备运行时工件后的复现实验已把 RTOS Guest 内部 1 ms 周期探针加入 Zephyr/e1000 客户机，并与 Linux Guest 周期探针、普通 UDP、QCZ1 可靠协议、AI 控制闭环一起纳入 `run_axvisor_dual_guest_qcz1_ai.sh` 的 PASS 判定。
 
 正式运行结果：
 
@@ -432,7 +433,8 @@ done
 正式运行命令：
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
+REPO=/path/to/tgoskits
+cd "${REPO}/os/axvisor/contest/quancheng2026"
 CARGO_BUILD_JOBS=1 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh \
   --evidence-dir /tmp/2026-07-27_05-57-22-dual-guest-qcz1-ai \
   --timeout 180 \

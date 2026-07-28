@@ -9,17 +9,21 @@ and evidence files.
 
 Recommended terminal layout:
 
-- Left terminal: run commands from `/home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026`.
+- Left terminal: run commands from `${REPO}/os/axvisor/contest/quancheng2026`.
 - Right terminal: inspect `realtime-report.md`, `realtime-summary.json`,
   `docs/realtime-evaluation.md`, and `results/realtime-comparison.csv`.
 - Keep the command prompt visible so reviewers can see the repository path.
 - Use a clean evidence directory name for the recording, for example
   `/tmp/qc_demo_final_evidence`.
+- Before recording, prepare the rootfs, Linux kernel, Zephyr RTOS binary and
+  host DTB exactly as listed in `docs/reproduce.md`; the live command below is
+  a prepared-artifact reproduction command, not a repository bootstrap.
 
 Main command:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
+REPO=/path/to/tgoskits
+cd "${REPO}/os/axvisor/contest/quancheng2026"
 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh \
   --evidence-dir /tmp/qc_demo_final_evidence \
   --timeout 180 \
@@ -31,7 +35,8 @@ cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
 Fast fallback command if recording time is tight:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
+REPO=/path/to/tgoskits
+cd "${REPO}/os/axvisor/contest/quancheng2026"
 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh \
   --evidence-dir /tmp/qc_demo_final_evidence \
   --timeout 120 \
@@ -63,7 +68,8 @@ Screen:
 Suggested commands:
 
 ```bash
-cd /home/kali/qc-tgoskits
+REPO=/path/to/tgoskits
+cd "${REPO}"
 git branch --show-current
 git rev-parse --short HEAD
 sed -n '1,40p' os/axvisor/contest/quancheng2026/README.md
@@ -90,7 +96,7 @@ sed -n '1,70p' os/axvisor/contest/quancheng2026/docs/realtime-evaluation.md
 
 Narration:
 
-现在运行一键复现实验脚本。这个脚本会准备 Linux rootfs、注入静态 AArch64 探针程序，启动 AxVisor 双 Guest，然后等待普通 UDP、QCZ1 可靠 UDP、AI 控制、Linux 周期探针、RTOS 周期探针和最终 Guest marker 全部通过。脚本只有在这些条件同时满足时才输出 PASS。
+现在运行准备运行时工件后的复现实验脚本。这个脚本会准备 Linux rootfs、注入静态 AArch64 探针程序，启动 AxVisor 双 Guest，然后等待普通 UDP、QCZ1 可靠 UDP、AI 控制、Linux 周期探针、RTOS 周期探针和最终 Guest marker 全部通过。脚本只有在这些条件同时满足时才输出 PASS。
 
 Screen:
 

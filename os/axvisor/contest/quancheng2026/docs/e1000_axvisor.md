@@ -86,6 +86,6 @@ Important files inside the evidence bundle:
 
 ## Integrated Dual-Guest Use
 
-This single-guest e1000 probe is now the RTOS-side network baseline for the integrated contest run. The current dual-guest evidence uses Linux/Starry guest `192.0.2.10` and Zephyr/e1000 RTOS guest `192.0.2.20` on the `br-qc-dual` IPv4 bridge, then runs plain UDP echo, QCZ1 reliable UDP control, Linux-side AI inference, RTOS-side control output, Linux and RTOS periodic probes, and tcpdump validation in one script.
+This single-guest e1000 probe is now the RTOS-side network baseline for the integrated contest run. The current dual-guest evidence uses Linux guest `192.0.2.10` and Zephyr/e1000 RTOS guest `192.0.2.20` on an isolated per-run IPv4 bridge recorded in `bridge.txt`, then runs plain UDP echo, QCZ1 reliable UDP control, Linux-side AI inference, RTOS-side control output, Linux and RTOS periodic probes, and tcpdump validation in one script.
 
 See `README.md`, `docs/reproduce.md` and `docs/realtime-evaluation.md` for the passing dual-guest results and long-sample realtime comparison.

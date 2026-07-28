@@ -71,6 +71,38 @@ def stats(values: Iterable[int]) -> dict[str, float | int | None]:
     }
 
 
+def metric_float(metrics: dict[str, str], key: str) -> float | None:
+    value = metrics.get(key)
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
+
+def apply_summary_stats(
+    parsed_stats: dict[str, float | int | None],
+    metrics: dict[str, str],
+    count: int,
+    *,
+    min_key: str | None = None,
+    mean_key: str | None = None,
+    max_key: str | None = None,
+) -> dict[str, float | int | None]:
+    """Use final summary fields when serial log interleaving hides samples."""
+    merged = dict(parsed_stats)
+    if count:
+        merged["count"] = count
+    for field, key in (("min", min_key), ("mean", mean_key), ("max", max_key)):
+        if key is None:
+            continue
+        value = metric_float(metrics, key)
+        if value is not None:
+            merged[field] = value
+    return merged
+
+
 def fmt_us(value: float | int | None) -> str:
     if value is None:
         return "n/a"
@@ -163,25 +195,63 @@ def parse_qemu_log(path: Path) -> dict[str, object]:
                 else:
                     ai_fail += 1
 
+    def metric_int(key: str, fallback: int) -> int:
+        value = metrics.get(key)
+        if value is None:
+            return fallback
+        try:
+            return int(value)
+        except ValueError:
+            return fallback
+
+    # Serial console output can interleave debug text into per-request marker
+    # lines. Prefer the final summary counters and summary latency fields when
+    # they are present.
+    counts = {
+        "udp_pass": metric_int("QC_UDP_SUCCESSES", udp_pass),
+        "udp_fail": metric_int("QC_UDP_FAILURES", udp_fail),
+        "qcz1_ack": metric_int("QC_QCZ1_RELIABLE_SUCCESSES", qcz1_ack),
+        "qcz1_fail": metric_int("QC_QCZ1_RELIABLE_FAILURES", qcz1_fail),
+        "ai_pass": metric_int("QC_AI_SUCCESSES", ai_pass),
+        "ai_fail": metric_int("QC_AI_FAILURES", ai_fail),
+        "duplicate_ack_samples": metric_int("QC_QCZ1_DUPLICATE_ACKS", len(dup_latency)),
+    }
     return {
         "metrics": metrics,
         "final_result": final_result,
         "markers": sorted(markers),
-        "counts": {
-            "udp_pass": udp_pass,
-            "udp_fail": udp_fail,
-            "qcz1_ack": qcz1_ack,
-            "qcz1_fail": qcz1_fail,
-            "ai_pass": ai_pass,
-            "ai_fail": ai_fail,
-            "duplicate_ack_samples": len(dup_latency),
-        },
+        "counts": counts,
         "latency_us": {
-            "plain_udp_rtt": stats(udp_rtt),
-            "qcz1_ack": stats(qcz1_latency),
+            "plain_udp_rtt": apply_summary_stats(
+                stats(udp_rtt),
+                metrics,
+                counts["udp_pass"],
+                min_key="QC_UDP_RTT_MIN_US",
+                mean_key="QC_UDP_RTT_MEAN_US",
+                max_key="QC_UDP_RTT_MAX_US",
+            ),
+            "qcz1_ack": apply_summary_stats(
+                stats(qcz1_latency),
+                metrics,
+                counts["qcz1_ack"],
+                min_key="QC_QCZ1_LATENCY_MIN_US",
+                mean_key="QC_QCZ1_LATENCY_MEAN_US",
+                max_key="QC_QCZ1_LATENCY_MAX_US",
+            ),
             "qcz1_duplicate_ack": stats(dup_latency),
-            "ai_infer": stats(ai_infer),
-            "ai_end_to_end": stats(ai_e2e),
+            "ai_infer": apply_summary_stats(
+                stats(ai_infer),
+                metrics,
+                counts["ai_pass"],
+                mean_key="QC_AI_INFER_MEAN_US",
+            ),
+            "ai_end_to_end": apply_summary_stats(
+                stats(ai_e2e),
+                metrics,
+                counts["ai_pass"],
+                mean_key="QC_AI_E2E_MEAN_US",
+                max_key="QC_AI_E2E_MAX_US",
+            ),
         },
     }
 
@@ -206,6 +276,26 @@ def parse_tcpdump(path: Path) -> dict[str, int | None]:
     return summary
 
 
+def parse_bridge_info(path: Path) -> dict[str, str]:
+    info = {
+        "net_mode": "n/a",
+        "bridge": "n/a",
+        "tap_linux": "n/a",
+        "tap_rtos": "n/a",
+    }
+    if not path.exists():
+        return info
+
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for raw in handle:
+            if "=" not in raw:
+                continue
+            key, value = raw.strip().split("=", 1)
+            if key in info:
+                info[key] = value
+    return info
+
+
 def read_final_result(evidence_dir: Path, fallback: str) -> str:
     for name in ("runner.log", "summary.txt", "qemu.log"):
         path = evidence_dir / name
@@ -225,6 +315,7 @@ def write_markdown(report: dict[str, object], path: Path) -> None:
     counts = report["counts"]  # type: ignore[index]
     metrics = report["metrics"]  # type: ignore[index]
     tcpdump = report["tcpdump"]  # type: ignore[index]
+    bridge = report["bridge"]  # type: ignore[index]
 
     lines = [
         "# AxVisor Dual-Guest Latency and Reliability Report",
@@ -235,6 +326,8 @@ def write_markdown(report: dict[str, object], path: Path) -> None:
         f"- Linux guest processor count: `{metrics.get('QC_CPUINFO_PROCESSORS', 'n/a')}`",
         f"- RTOS endpoint: Zephyr e1000 at `192.0.2.20:4242`",
         f"- Linux guest periodic samples: `{metrics.get('QC_RT_PERIOD_SAMPLES', 'n/a')}` at `{metrics.get('QC_RT_PERIOD_NS', 'n/a')}` ns period",
+        f"- Network mode: `{bridge.get('net_mode', 'n/a')}`",
+        f"- Host network object: bridge `{bridge.get('bridge', 'n/a')}`, Linux TAP `{bridge.get('tap_linux', 'n/a')}`, RTOS TAP `{bridge.get('tap_rtos', 'n/a')}`",
         f"- RTOS guest periodic samples: `{metrics.get('QC_RTOS_PERIOD_SAMPLES', 'n/a')}` at `{metrics.get('QC_RTOS_PERIOD_NS', 'n/a')}` ns period",
         "",
         "## Reliability",
@@ -244,7 +337,7 @@ def write_markdown(report: dict[str, object], path: Path) -> None:
         f"| Plain UDP echo | {counts['udp_pass']} | {counts['udp_fail']} | byte-exact payload check |",
         f"| QCZ1 reliable control | {counts['qcz1_ack']} | {counts['qcz1_fail']} | duplicate ACK samples: {counts['duplicate_ack_samples']} |",
         f"| AI control closed loop | {counts['ai_pass']} | {counts['ai_fail']} | fixed-point MLP inference in Linux guest |",
-        f"| tcpdump | {tcpdump.get('packets_captured')} captured | {tcpdump.get('packets_dropped_by_kernel')} kernel drops | bridge `br-qc-dual` |",
+        f"| tcpdump | {tcpdump.get('packets_captured')} captured | {tcpdump.get('packets_dropped_by_kernel')} kernel drops | bridge `{bridge.get('bridge', 'n/a')}` |",
         "",
         "## Latency",
         "",
@@ -366,6 +459,7 @@ def main() -> int:
     report["evidence_dir"] = str(evidence_dir)
     report["throughput_tps"] = serial_throughput(report["latency_us"])  # type: ignore[arg-type]
     report["tcpdump"] = parse_tcpdump(evidence_dir / "tcpdump.log")
+    report["bridge"] = parse_bridge_info(evidence_dir / "bridge.txt")
 
     required = {
         "QC_RT_PERIODIC_RESULT=PASS",

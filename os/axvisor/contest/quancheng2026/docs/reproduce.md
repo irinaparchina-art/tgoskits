@@ -56,7 +56,7 @@ The build directory already records:
 
 ```text
 BOARD=qemu_cortex_a53
-DTC_OVERLAY_FILE=/home/kali/qc-tgoskits/os/axvisor/tmp/configs/2026-07-24_zephyr-qemu-cortex-a53-virtio-net-bus23-sram-0x90000000.overlay
+DTC_OVERLAY_FILE=${REPO}/os/axvisor/tmp/configs/2026-07-24_zephyr-qemu-cortex-a53-virtio-net-bus23-sram-0x90000000.overlay
 EXTRA_CONF_FILE=/tmp/2026-07-26_zephyr-echo-ipv4only-udp-mgmt12288.conf
 ```
 
@@ -190,7 +190,8 @@ This is the native RTOS baseline for task one. It runs Zephyr's official
 AxVisor:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
+REPO=/path/to/tgoskits
+cd "${REPO}/os/axvisor/contest/quancheng2026"
 ./scripts/run_native_zephyr_latency_baseline.sh
 ```
 
@@ -232,12 +233,47 @@ metrics are parsed, and no QEMU process remains after timeout cleanup.
 
 ## AxVisor Dual-Guest QCZ1 and AI Reproduction
 
-The integrated task-two and task-three path is now reproduced by:
+The integrated task-two and task-three path is reproduced after preparing the runtime artifacts that are intentionally not checked into this first-stage contest PR:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
+REPO=/path/to/tgoskits
+cd "${REPO}"
+cargo xtask axvisor image pull --arch aarch64 -S tmp/axbuild/rootfs
+
+install -D /path/to/linux-qemu \
+  os/axvisor/tmp/images/qemu-aarch64/linux/linux-qemu
+install -D /path/to/zephyr.bin \
+  os/axvisor/tmp/images/qemu-aarch64/zephyr-e1000-0x90000000-qcz1/zephyr.bin
+install -D /path/to/2026-07-24_qemu-aarch64-host-reserve-zephyr-0x90000000.dtb \
+  os/axvisor/tmp/configs/2026-07-24_qemu-aarch64-host-reserve-zephyr-0x90000000.dtb
+
+cd os/axvisor/contest/quancheng2026
+sudo -v
 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh
 ```
+
+The default tap mode creates per-run bridge/TAP devices and starts tcpdump, so sudo authentication is deliberately supplied by the caller with sudo -v; the repository does not store a sudo password or use stdin password mode. Use --prepare-only to validate artifact preparation without creating host network devices.
+
+For reviewer machines where creating host TAP devices is not available, the same runner can execute the two guests through QEMU hub networking:
+
+```bash
+./scripts/run_axvisor_dual_guest_qcz1_ai.sh --net-mode hub
+```
+
+This mode still requires the runtime artifacts above and still checks the Linux guest, Zephyr guest, plain UDP, QCZ1 reliable UDP, AI control and realtime markers before printing `result=PASS`. It intentionally skips host bridge/TAP creation and tcpdump capture, so the default tap mode remains the host-network lifecycle evidence.
+
+Runtime artifact contract for the integrated dual-guest runner:
+
+| Artifact | Expected path under repo root | Preparation source | Known passing SHA256 |
+| --- | --- | --- | --- |
+| AArch64 Alpine rootfs image | `tmp/axbuild/rootfs/rootfs-aarch64-alpine.img/rootfs-aarch64-alpine.img` | `cargo xtask axvisor image pull --arch aarch64 -S tmp/axbuild/rootfs` | `f243f900991a10bffdcd04d8865554a1c57b2f4eb73316a688a1b2bb7dbc9553` |
+| Linux guest kernel | `os/axvisor/tmp/images/qemu-aarch64/linux/linux-qemu` | Matching local AxVisor image/build output | `f262d305daa57a8f59d848d530e0d24f0b48f9d0b39f86eeb27f4114845bef17` |
+| Zephyr RTOS guest binary | `os/axvisor/tmp/images/qemu-aarch64/zephyr-e1000-0x90000000-qcz1/zephyr.bin` | Matching local Zephyr/e1000 RTOS build output | `0baf6b4a08dc13a69ed739afd5c58bb138f7ae23cbc46921e864cdb4cc660f86` |
+| Host DTB | `os/axvisor/tmp/configs/2026-07-24_qemu-aarch64-host-reserve-zephyr-0x90000000.dtb` | Matching local AxVisor host-device-tree output | `0f840bc4c162c2c0bd8f871d97c2124c9083ebe7d6d2063855e0ade5a8aa90bc` |
+
+The runner uses the extracted rootfs image from `cargo xtask axvisor image pull`; if the image is absent, it attempts that image-manager pull before checking the rest of the runtime artifact contract. The Linux kernel, Zephyr RTOS binary and host DTB paths above are not stored in this first-stage contest PR; they must be supplied from the matching local AxVisor image/build output before running the integrated QEMU path. If those runtime artifacts are absent, the runner exits before QEMU with `missing_required_path=...`; in that state the PR only supports static validation and documentation review for this integrated path. The stress and long-sample commands later in this section assume the same runtime artifacts have already been prepared.
+
+Current limitation: this PR does not claim that the Linux kernel, Zephyr RTOS binary or host DTB can be regenerated from this PR alone. The integrated QEMU path is a prepared-artifact reproduction path; generation of those runtime artifacts is kept outside this first-stage contest artifact PR and should be reviewed as a separate follow-up if needed.
 
 The default topology is:
 
@@ -257,9 +293,9 @@ Zephyr RTOS guest:
   role: UDP server, QCZ1 state machine and control actuator
 
 Host network:
-  br-qc-dual bridge
-  tap-qc-linux attached to Linux guest
-  tap-qc-rtos attached to Zephyr/e1000 guest
+  per-run isolated bridge, exact name recorded as bridge= in bridge.txt
+  per-run Linux TAP, exact name recorded as tap_linux= in bridge.txt
+  per-run RTOS TAP, exact name recorded as tap_rtos= in bridge.txt
 ```
 
 See `docs/network-topology.md` for the reviewer-facing network matrix,
@@ -283,17 +319,17 @@ The script performs these steps:
 1. Compile linux/qc_dual_guest_udp_echo_probe.c as a freestanding static AArch64 ELF.
 2. Compile linux/qc_qcz1_guest_demo.c as a freestanding static AArch64 ELF.
 3. Compile linux/qc_periodic_latency_probe.c as a freestanding static AArch64 ELF.
-4. Extract the Alpine AArch64 rootfs archive.
+4. Copy the canonical axbuild rootfs image produced by the image manager into the contest build directory.
 5. Run e2fsck -fy before debugfs injection to replay and clear the ext4 journal.
 6. Inject /qc-dual-net.sh, /qc-udp-probe, /qc-qcz1-demo and /qc-rt-probe.
 7. Run e2fsck -fy after injection so the guest does not replay stale metadata.
 8. Generate runtime, Linux VM and Zephyr VM TOML configs into the evidence directory.
-9. Create br-qc-dual, tap-qc-linux and tap-qc-rtos.
-10. Run cargo xtask qemu with both VM configs.
+9. Create per-run bridge/TAP objects and record their exact names in bridge.txt.
+10. Run root-level cargo xtask axvisor qemu with both VM configs.
 11. Capture qemu.log, tcpdump.log, summary.txt, realtime-report.md and SHA256 records.
 ```
 
-The rootfs journal cleanup is important. Without the first `e2fsck -fy`, `debugfs` writes can appear to succeed but then be reverted when the Linux guest replays the ext4 journal on boot.
+The rootfs journal cleanup is important. Without the first `e2fsck -fy`, `debugfs` writes can appear to succeed but then be reverted when the Linux guest replays the ext4 journal on boot. The runner first copies the canonical axbuild rootfs image into the contest build directory and only modifies that copy.
 
 The script reports `result=PASS` only if all required markers are present:
 
@@ -363,7 +399,7 @@ for round in 1 2 3; do
 done
 ```
 
-Known clean one-command passing result from 2026-07-27:
+Known prepared-artifact passing result from 2026-07-27:
 
 ```text
 evidence_dir=/tmp/qc_full_rtos_periodic_20260727_024133_evidence

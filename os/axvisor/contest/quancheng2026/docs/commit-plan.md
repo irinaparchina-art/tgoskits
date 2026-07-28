@@ -120,7 +120,8 @@ commit.
 Run from:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
+REPO=/path/to/tgoskits
+cd "${REPO}/os/axvisor/contest/quancheng2026"
 ```
 
 Checks:
@@ -161,7 +162,8 @@ Expected result:
 Only after the checks pass:
 
 ```bash
-cd /home/kali/qc-tgoskits
+REPO=/path/to/tgoskits
+cd "${REPO}"
 git add -- os/axvisor/contest/quancheng2026
 git diff --cached --stat
 git diff --cached --name-status
@@ -200,7 +202,8 @@ Validation:
 - cargo fmt --check -p arm_vcpu -p arm_vgic -p axvmconfig -p axvm -p axbuild
 - cargo test -p axvmconfig -p axvm -p arm_vgic --lib
 - cargo test -p arm_vcpu --lib
-- cargo test -p axbuild command_parses_image_pull --lib
+- CARGO_BUILD_JOBS=1 cargo test -p axbuild image::tests::parses_pull_by_arch --lib
+- CARGO_BUILD_JOBS=1 cargo test -p axbuild image::storage::tests::pull_rootfs_image_returns_extracted_rootfs_file --lib
 ```
 
 ## Suggested PR Summary

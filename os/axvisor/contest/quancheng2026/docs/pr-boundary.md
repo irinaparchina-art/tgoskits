@@ -96,7 +96,7 @@ Purpose:
 Observed validation:
 
 - `cargo test -p axvmconfig -p axvm -p arm_vgic --lib` passed, including
-  `axvmconfig 18/18` and `axvm 103/103`.
+  `axvmconfig 18/18` and `axvm 110/110`.
 
 ### Physical Timer / vTimer Support
 
@@ -176,7 +176,8 @@ Purpose:
 
 Observed validation:
 
-- `cargo test -p axbuild command_parses_image_pull --lib` passed.
+- `CARGO_BUILD_JOBS=1 cargo test -p axbuild image::tests::parses_pull_by_arch --lib` passed.
+- `CARGO_BUILD_JOBS=1 cargo test -p axbuild image::storage::tests::pull_rootfs_image_returns_extracted_rootfs_file --lib` passed.
 
 Review note:
 

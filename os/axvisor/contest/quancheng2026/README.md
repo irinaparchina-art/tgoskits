@@ -23,7 +23,7 @@ Main evidence as of 2026-07-27:
 - AI control smoke: `20/20` AI control messages, inference mean `0.0293 ms`, end-to-end mean `1.118 ms`.
 - Zephyr native latency baseline: `qemu_cortex_a53`, `47` reported metrics, context switch `2400 ns`, ISR return `1071/1359 ns`, semaphore context switch `3440/3967 ns`, maximum reported primitive latency `46703 ns`, final marker `PROJECT EXECUTION SUCCESSFUL`.
 - AxVisor + Zephyr e1000 strict probe: `20/20 PASS`, UDP success rate `1.000000`, RTT mean `1.070 ms`, QEMU monitor confirms `model=e1000`.
-- AxVisor dual guest Linux/Zephyr QCZ1 + AI one-command reproduction: Linux guest has `2` vCPUs online, plain UDP `20/20 PASS` with RTT mean `2.943 ms` and max `19.039 ms`, reliable UDP `10/10 PASS`, duplicate ACK `2`, retransmits `0`, AI control `10/10 PASS`, AI end-to-end mean `2.186 ms` and max `3.389 ms`, Linux guest periodic probe `2000` samples at `1 ms` period with mean lateness `0.829 ms`, p99 `4.455 ms` and max `10.167 ms`, RTOS guest periodic probe `1000` samples at `1 ms` period with mean lateness `0.110 ms`, p99 `0.887 ms` and max `5.156 ms`, tcpdump captures `88` packets with `0` kernel drops, final markers `QC_RTOS_PERIODIC_RESULT=PASS` and `QC_DUAL_GUEST_LINUX_INIT=PASS`.
+- AxVisor dual guest Linux/Zephyr QCZ1 + AI prepared-artifact reproduction: Linux guest has `2` vCPUs online, plain UDP `20/20 PASS` with RTT mean `2.943 ms` and max `19.039 ms`, reliable UDP `10/10 PASS`, duplicate ACK `2`, retransmits `0`, AI control `10/10 PASS`, AI end-to-end mean `2.186 ms` and max `3.389 ms`, Linux guest periodic probe `2000` samples at `1 ms` period with mean lateness `0.829 ms`, p99 `4.455 ms` and max `10.167 ms`, RTOS guest periodic probe `1000` samples at `1 ms` period with mean lateness `0.110 ms`, p99 `0.887 ms` and max `5.156 ms`, tcpdump captures `88` packets with `0` kernel drops, final markers `QC_RTOS_PERIODIC_RESULT=PASS` and `QC_DUAL_GUEST_LINUX_INIT=PASS`.
 - AxVisor dual guest Linux/Zephyr 0-worker long-sample reproduction: Linux guest stress workers `0`, Linux periodic probe `10000` samples at `1 ms` period with mean lateness `0.859 ms`, p99 `2.789 ms` and max `12.764 ms`, RTOS guest periodic probe `1000` samples at `1 ms` period with mean lateness `0.088 ms`, p99 `0.613 ms` and max `5.329 ms`, plain UDP `20/20 PASS`, reliable UDP `10/10 PASS`, duplicate ACK `2`, retransmits `0`, AI control `10/10 PASS`, AI end-to-end mean `1.668 ms` and max `1.925 ms`, tcpdump captures `88` packets with `0` kernel drops.
 - AxVisor dual guest Linux/Zephyr 1-worker long/stress reproduction: Linux guest stress workers `1`, Linux periodic probe `10000` samples at `1 ms` period with mean lateness `0.828 ms`, p99 `2.559 ms` and max `9.586 ms`, RTOS guest periodic probe `1000` samples at `1 ms` period with mean lateness `0.123 ms`, p99 `1.228 ms` and max `4.352 ms`, plain UDP `20/20 PASS`, reliable UDP `10/10 PASS`, duplicate ACK `2`, retransmits `0`, AI control `10/10 PASS`, AI end-to-end mean `1.996 ms` and max `5.333 ms`, tcpdump captures `88` packets with `0` kernel drops.
 - AxVisor dual guest Linux/Zephyr 2-worker long/stress reproduction: Linux guest stress workers `2`, Linux periodic probe `10000` samples at `1 ms` period with mean lateness `0.895 ms`, p99 `4.347 ms` and max `9.145 ms`, RTOS guest periodic probe `1000` samples at `1 ms` period with mean lateness `0.099 ms`, p99 `0.727 ms` and max `3.677 ms`, plain UDP `20/20 PASS`, reliable UDP `10/10 PASS`, duplicate ACK `2`, retransmits `0`, AI control `10/10 PASS`, AI end-to-end mean `4.964 ms` and max `21.059 ms`, tcpdump captures `88` packets with `0` kernel drops.
@@ -129,7 +129,8 @@ boundary used by the integrated dual-guest run.
 The task-one RTOS baseline uses Zephyr's official `tests/benchmarks/latency_measure` benchmark on native QEMU `qemu_cortex_a53`:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
+REPO=/path/to/tgoskits
+cd "${REPO}/os/axvisor/contest/quancheng2026"
 ./scripts/run_native_zephyr_latency_baseline.sh
 ```
 
@@ -154,7 +155,7 @@ result=PASS
 The current integrated evidence runs the contest protocol in the required AxVisor dual-guest topology:
 
 ```text
-Linux/Starry guest  <--- IP/UDP --->  Zephyr/RTOS guest
+Linux guest  <--- IP/UDP --->  Zephyr/RTOS guest
 ```
 
 For the passing run, Linux uses a 2-vCPU guest pinned to pCPU 1-2 and Zephyr uses a 1-vCPU e1000 RTOS guest pinned to pCPU 0. The Linux VM includes a `gppt-gicd` device so Linux GIC distributor accesses do not disturb the Zephyr e1000 interrupt path. The Linux VM passes through PL011 and virtio IRQs `[1, 31, 47]` and boots with `noirqdebug` to avoid QEMU PL011 spurious interrupt diagnostics from pausing the measurement path during short contest runs.
@@ -162,19 +163,55 @@ For the passing run, Linux uses a 2-vCPU guest pinned to pCPU 1-2 and Zephyr use
 The detailed network boundary is documented in `docs/network-topology.md`.
 The AI/manual baseline comparison is documented in `docs/ai-control-evaluation.md`.
 
-Run:
+Prepare the runtime artifacts, then run:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
+REPO=/path/to/tgoskits
+cd "${REPO}"
+cargo xtask axvisor image pull --arch aarch64 -S tmp/axbuild/rootfs
+
+install -D /path/to/linux-qemu \
+  os/axvisor/tmp/images/qemu-aarch64/linux/linux-qemu
+install -D /path/to/zephyr.bin \
+  os/axvisor/tmp/images/qemu-aarch64/zephyr-e1000-0x90000000-qcz1/zephyr.bin
+install -D /path/to/2026-07-24_qemu-aarch64-host-reserve-zephyr-0x90000000.dtb \
+  os/axvisor/tmp/configs/2026-07-24_qemu-aarch64-host-reserve-zephyr-0x90000000.dtb
+
+cd os/axvisor/contest/quancheng2026
+sudo -v
 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh
 ```
+
+The default tap mode creates per-run bridge/TAP devices and starts tcpdump, so sudo authentication is deliberately supplied by the caller with sudo -v; the repository does not store a sudo password or use stdin password mode. Use --prepare-only to validate artifact preparation without creating host network devices.
+
+For reviewer machines where creating host TAP devices is not available, the same runner can execute the two guests through QEMU hub networking:
+
+```bash
+./scripts/run_axvisor_dual_guest_qcz1_ai.sh --net-mode hub
+```
+
+This mode still requires the runtime artifacts above and still checks the Linux guest, Zephyr guest, plain UDP, QCZ1 reliable UDP, AI control and realtime markers before printing `result=PASS`. It intentionally skips host bridge/TAP creation and tcpdump capture, so the default tap mode remains the host-network lifecycle evidence.
+
+Runtime artifact contract for the integrated dual-guest runner:
+
+| Artifact | Expected path under repo root | Preparation source | Known passing SHA256 |
+| --- | --- | --- | --- |
+| AArch64 Alpine rootfs image | `tmp/axbuild/rootfs/rootfs-aarch64-alpine.img/rootfs-aarch64-alpine.img` | `cargo xtask axvisor image pull --arch aarch64 -S tmp/axbuild/rootfs` | `f243f900991a10bffdcd04d8865554a1c57b2f4eb73316a688a1b2bb7dbc9553` |
+| Linux guest kernel | `os/axvisor/tmp/images/qemu-aarch64/linux/linux-qemu` | Matching local AxVisor image/build output | `f262d305daa57a8f59d848d530e0d24f0b48f9d0b39f86eeb27f4114845bef17` |
+| Zephyr RTOS guest binary | `os/axvisor/tmp/images/qemu-aarch64/zephyr-e1000-0x90000000-qcz1/zephyr.bin` | Matching local Zephyr/e1000 RTOS build output | `0baf6b4a08dc13a69ed739afd5c58bb138f7ae23cbc46921e864cdb4cc660f86` |
+| Host DTB | `os/axvisor/tmp/configs/2026-07-24_qemu-aarch64-host-reserve-zephyr-0x90000000.dtb` | Matching local AxVisor host-device-tree output | `0f840bc4c162c2c0bd8f871d97c2124c9083ebe7d6d2063855e0ade5a8aa90bc` |
+
+The runner uses the rootfs produced by `cargo xtask axvisor image pull` at the extracted image path above. If that rootfs image is absent, it attempts the same image-manager pull before checking the remaining runtime artifacts. The Linux kernel, Zephyr RTOS binary and host DTB are intentionally not checked into this first-stage contest PR. If those artifacts are absent, the runner stops before QEMU with `missing_required_path=...`; in that state only the static checks and prepared-artifact documentation can be validated until the matching local build outputs are supplied. The stress and long-sample commands below assume the same runtime artifacts have already been prepared.
+
+Current limitation: this PR does not claim that the Linux kernel, Zephyr RTOS binary or host DTB can be regenerated from this PR alone. The integrated QEMU path is a prepared-artifact reproduction path; generation of those runtime artifacts is kept outside this first-stage contest artifact PR and should be reviewed as a separate follow-up if needed.
 
 The script prints `result=PASS` only after it sees plain UDP, reliable QCZ1, AI control, Linux guest periodic, RTOS guest periodic and final Linux init PASS markers.
 
 For the 0-worker long-sample baseline used as the no-pressure comparison point:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
+REPO=/path/to/tgoskits
+cd "${REPO}/os/axvisor/contest/quancheng2026"
 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh \
   --evidence-dir /tmp/qc_clean_long_20260727_033600_evidence \
   --timeout 180 \
@@ -188,7 +225,8 @@ This mode collects the same Linux 1 ms periodic probe, RTOS guest 1 ms periodic 
 For the longer stress-backed task-one run with one Linux guest stress worker:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
+REPO=/path/to/tgoskits
+cd "${REPO}/os/axvisor/contest/quancheng2026"
 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh \
   --evidence-dir /tmp/qc_stress_long_20260727_030428_evidence \
   --timeout 150 \
@@ -202,7 +240,8 @@ This mode keeps one Linux guest CPU busy-loop worker active while collecting the
 For a stronger 2-worker pressure run on the 2-vCPU Linux guest:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
+REPO=/path/to/tgoskits
+cd "${REPO}/os/axvisor/contest/quancheng2026"
 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh \
   --evidence-dir /tmp/qc_stress2_long_20260727_033000_evidence \
   --timeout 180 \
@@ -216,7 +255,8 @@ This mode keeps two Linux guest CPU busy-loop workers active during the same int
 For an overcommit stress run with four Linux workers on the 2-vCPU Linux guest:
 
 ```bash
-cd /home/kali/qc-tgoskits/os/axvisor/contest/quancheng2026
+REPO=/path/to/tgoskits
+cd "${REPO}/os/axvisor/contest/quancheng2026"
 CARGO_BUILD_JOBS=1 ./scripts/run_axvisor_dual_guest_qcz1_ai.sh \
   --evidence-dir /tmp/2026-07-27_05-57-22-dual-guest-qcz1-ai \
   --timeout 180 \
