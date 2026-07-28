@@ -238,7 +238,7 @@ The integrated task-two and task-three path is reproduced after preparing the ru
 ```bash
 REPO=/path/to/tgoskits
 cd "${REPO}"
-cargo xtask axvisor image pull --arch aarch64 -S tmp/axbuild/rootfs
+cargo xtask image pull --arch aarch64 -S tmp/axbuild/rootfs
 
 install -D /path/to/linux-qemu \
   os/axvisor/tmp/images/qemu-aarch64/linux/linux-qemu
@@ -266,12 +266,12 @@ Runtime artifact contract for the integrated dual-guest runner:
 
 | Artifact | Expected path under repo root | Preparation source | Known passing SHA256 |
 | --- | --- | --- | --- |
-| AArch64 Alpine rootfs image | `tmp/axbuild/rootfs/rootfs-aarch64-alpine.img/rootfs-aarch64-alpine.img` | `cargo xtask axvisor image pull --arch aarch64 -S tmp/axbuild/rootfs` | `f243f900991a10bffdcd04d8865554a1c57b2f4eb73316a688a1b2bb7dbc9553` |
+| AArch64 Alpine rootfs image | `tmp/axbuild/rootfs/rootfs-aarch64-alpine.img/rootfs-aarch64-alpine.img` | `cargo xtask image pull --arch aarch64 -S tmp/axbuild/rootfs` | `f243f900991a10bffdcd04d8865554a1c57b2f4eb73316a688a1b2bb7dbc9553` |
 | Linux guest kernel | `os/axvisor/tmp/images/qemu-aarch64/linux/linux-qemu` | Matching local AxVisor image/build output | `f262d305daa57a8f59d848d530e0d24f0b48f9d0b39f86eeb27f4114845bef17` |
 | Zephyr RTOS guest binary | `os/axvisor/tmp/images/qemu-aarch64/zephyr-e1000-0x90000000-qcz1/zephyr.bin` | Matching local Zephyr/e1000 RTOS build output | `0baf6b4a08dc13a69ed739afd5c58bb138f7ae23cbc46921e864cdb4cc660f86` |
 | Host DTB | `os/axvisor/tmp/configs/2026-07-24_qemu-aarch64-host-reserve-zephyr-0x90000000.dtb` | Matching local AxVisor host-device-tree output | `0f840bc4c162c2c0bd8f871d97c2124c9083ebe7d6d2063855e0ade5a8aa90bc` |
 
-The runner uses the extracted rootfs image from `cargo xtask axvisor image pull`; if the image is absent, it attempts that image-manager pull before checking the rest of the runtime artifact contract. The Linux kernel, Zephyr RTOS binary and host DTB paths above are not stored in this first-stage contest PR; they must be supplied from the matching local AxVisor image/build output before running the integrated QEMU path. If those runtime artifacts are absent, the runner exits before QEMU with `missing_required_path=...`; in that state the PR only supports static validation and documentation review for this integrated path. The stress and long-sample commands later in this section assume the same runtime artifacts have already been prepared.
+The runner uses the extracted rootfs image from `cargo xtask image pull`; if the image is absent, it attempts that image-manager pull before checking the rest of the runtime artifact contract. The Linux kernel, Zephyr RTOS binary and host DTB paths above are not stored in this first-stage contest PR; they must be supplied from the matching local AxVisor image/build output before running the integrated QEMU path. If those runtime artifacts are absent, the runner exits before QEMU with `missing_required_path=...`; in that state the PR only supports static validation and documentation review for this integrated path. The stress and long-sample commands later in this section assume the same runtime artifacts have already been prepared.
 
 Current limitation: this PR does not claim that the Linux kernel, Zephyr RTOS binary or host DTB can be regenerated from this PR alone. The integrated QEMU path is a prepared-artifact reproduction path; generation of those runtime artifacts is kept outside this first-stage contest artifact PR and should be reviewed as a separate follow-up if needed.
 

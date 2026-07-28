@@ -9,7 +9,6 @@ use ostool::{
 use crate::context::{
     AppContext, AxvisorCliArgs, AxvisorRequestPaths, ResolvedAxvisorRequest, SnapshotPersistence,
 };
-pub use crate::image;
 
 pub mod board;
 pub mod build;
@@ -34,8 +33,6 @@ pub enum Command {
     Defconfig(ArgsDefconfig),
     /// Board config helpers
     Config(ArgsConfig),
-    /// TGOS image management
-    Image(image::ImageArgs),
 }
 
 #[derive(Args, Clone)]
@@ -249,7 +246,6 @@ impl Axvisor {
             Command::Defconfig(args) => self.defconfig(args),
             Command::Config(args) => self.config(args),
             Command::Test(args) => self.test(args).await,
-            Command::Image(args) => image::run(args).await,
         }
     }
 
@@ -699,40 +695,6 @@ mod tests {
                 );
             }
             _ => panic!("expected qemu command"),
-        }
-    }
-
-    #[test]
-    fn command_parses_image_pull() {
-        #[derive(Parser)]
-        struct Cli {
-            #[command(subcommand)]
-            command: Command,
-        }
-
-        let cli = Cli::try_parse_from([
-            "axvisor",
-            "image",
-            "-S",
-            "tmp/images",
-            "pull",
-            "rootfs-aarch64-alpine.img:v0.0.5",
-            "--no-extract",
-        ])
-        .unwrap();
-
-        match cli.command {
-            Command::Image(args) => match args.command {
-                image::Command::Pull(args) => {
-                    assert_eq!(
-                        args.image.as_deref(),
-                        Some("rootfs-aarch64-alpine.img:v0.0.5")
-                    );
-                    assert!(args.no_extract);
-                }
-                _ => panic!("expected image pull command"),
-            },
-            _ => panic!("expected image command"),
         }
     }
 }

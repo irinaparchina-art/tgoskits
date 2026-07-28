@@ -265,13 +265,13 @@ fi
 
 if [[ ! -f "${rootfs_image_source}" ]]; then
     echo "rootfs_image_missing=${rootfs_image_source}"
-    echo "action=cargo xtask axvisor image pull --arch aarch64 -S tmp/axbuild/rootfs"
-    (cd "${repo}" && cargo xtask axvisor image pull --arch aarch64 -S tmp/axbuild/rootfs)
+    echo "action=cargo xtask image pull --arch aarch64 -S tmp/axbuild/rootfs"
+    (cd "${repo}" && cargo xtask image pull --arch aarch64 -S tmp/axbuild/rootfs)
 fi
 
 if [[ ! -f "${rootfs_image_source}" ]]; then
     echo "missing_required_path=${rootfs_image_source}" >&2
-    echo "hint=run 'cargo xtask axvisor image pull --arch aarch64 -S tmp/axbuild/rootfs' from the repository root, then retry" >&2
+    echo "hint=run 'cargo xtask image pull --arch aarch64 -S tmp/axbuild/rootfs' from the repository root, then retry" >&2
     exit 12
 fi
 rootfs_source_kind="image-manager"
