@@ -75,6 +75,7 @@ analyzer="${script_dir}/analyze_zephyr_latency_measure.py"
 
 mkdir -p "${evidence_dir}"
 exec > >(tee "${evidence_dir}/runner.log") 2>&1
+: > "${evidence_dir}/build.log"
 
 echo "experiment=Zephyr native latency baseline"
 echo "workspace=${workspace}"
