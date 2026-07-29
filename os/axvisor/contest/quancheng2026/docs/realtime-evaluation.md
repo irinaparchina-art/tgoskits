@@ -46,6 +46,70 @@ periodic-task results because the AxVisor runs include VM exits, virtual
 interrupt delivery, virtual/physical timer handling, Linux guest load and
 cross-guest network traffic.
 
+## Complete `latency_measure` Before/After Table
+
+This table lists every metric emitted by Zephyr
+`tests/benchmarks/latency_measure`. `Before` is the initial native Zephyr
+baseline collected on 2026-07-27; `After` is the current PR-head recheck
+collected on 2026-07-28 with the same board, benchmark and analyzer. PR1703
+does not mix AxVisor core realtime patches, so these rows are used as the
+native RTOS primitive baseline; AxVisor-hosted behavior is compared in the
+dual-guest periodic-task tables below.
+
+| # | Metric | Description | Before cycles/ns | After cycles/ns | Delta ns |
+|---:|---|---|---:|---:|---:|
+| 1 | `thread.yield.preemptive.ctx.k_to_k` | Context switch via k_yield | `150 / 2400` | `150 / 2400` | `0` |
+| 2 | `thread.yield.cooperative.ctx.k_to_k` | Context switch via k_yield | `150 / 2400` | `150 / 2400` | `0` |
+| 3 | `isr.resume.interrupted.thread.kernel` | Return from ISR to interrupted thread | `66 / 1071` | `66 / 1071` | `0` |
+| 4 | `isr.resume.different.thread.kernel` | Return from ISR to another thread | `84 / 1359` | `84 / 1359` | `0` |
+| 5 | `thread.create.kernel.from.kernel` | Create thread | `2918 / 46703` | `2918 / 46703` | `0` |
+| 6 | `thread.start.kernel.from.kernel` | Start thread | `257 / 4127` | `257 / 4127` | `0` |
+| 7 | `thread.suspend.kernel.from.kernel` | Suspend thread | `146 / 2351` | `146 / 2351` | `0` |
+| 8 | `thread.resume.kernel.from.kernel` | Resume thread | `171 / 2751` | `171 / 2751` | `0` |
+| 9 | `thread.abort.kernel.from.kernel` | Abort thread | `124 / 1999` | `124 / 1999` | `0` |
+| 10 | `fifo.put.immediate.kernel` | Add data to FIFO (no ctx switch) | `60 / 975` | `60 / 975` | `0` |
+| 11 | `fifo.get.immediate.kernel` | Get data from FIFO (no ctx switch) | `54 / 879` | `54 / 879` | `0` |
+| 12 | `fifo.put.alloc.immediate.kernel` | Allocate to add data to FIFO (no ctx switch) | `378 / 6048` | `378 / 6048` | `0` |
+| 13 | `fifo.get.free.immediate.kernel` | Free when getting data from FIFO (no ctx switch) | `409 / 6544` | `409 / 6544` | `0` |
+| 14 | `fifo.get.blocking.k_to_k` | Get data from FIFO (w/ ctx switch) | `223 / 3568` | `223 / 3568` | `0` |
+| 15 | `fifo.put.wake+ctx.k_to_k` | Add data to FIFO (w/ ctx switch) | `283 / 4528` | `283 / 4528` | `0` |
+| 16 | `fifo.get.free.blocking.k_to_k` | Free when getting data from FIFO (w/ ctx switch) | `224 / 3584` | `224 / 3584` | `0` |
+| 17 | `fifo.put.alloc.wake+ctx.k_to_k` | Allocate to add data to FIFO (w/ ctx switch) | `283 / 4528` | `283 / 4528` | `0` |
+| 18 | `lifo.put.immediate.kernel` | Add data to LIFO (no ctx switch) | `59 / 959` | `59 / 959` | `0` |
+| 19 | `lifo.get.immediate.kernel` | Get data from LIFO (no ctx switch) | `54 / 879` | `54 / 879` | `0` |
+| 20 | `lifo.put.alloc.immediate.kernel` | Allocate to add data to LIFO (no ctx switch) | `377 / 6032` | `377 / 6032` | `0` |
+| 21 | `lifo.get.free.immediate.kernel` | Free when getting data from LIFO (no ctx switch) | `409 / 6544` | `409 / 6544` | `0` |
+| 22 | `lifo.get.blocking.k_to_k` | Get data from LIFO (w/ ctx switch) | `223 / 3568` | `223 / 3568` | `0` |
+| 23 | `lifo.put.wake+ctx.k_to_k` | Add data to LIFO (w/ ctx switch) | `282 / 4512` | `282 / 4512` | `0` |
+| 24 | `lifo.get.free.blocking.k_to_k` | Free when getting data from LIFO (w/ ctx switch) | `224 / 3584` | `224 / 3584` | `0` |
+| 25 | `lifo.put.alloc.wake+ctx.k_to_k` | Allocate to add data to LIFO (w/ ctx switch) | `282 / 4512` | `282 / 4512` | `0` |
+| 26 | `events.post.immediate.kernel` | Post events (nothing wakes) | `104 / 1664` | `104 / 1664` | `0` |
+| 27 | `events.set.immediate.kernel` | Set events (nothing wakes) | `104 / 1664` | `104 / 1664` | `0` |
+| 28 | `events.wait.immediate.kernel` | Wait for any events (no ctx switch) | `57 / 912` | `57 / 912` | `0` |
+| 29 | `events.wait_all.immediate.kernel` | Wait for all events (no ctx switch) | `59 / 944` | `59 / 944` | `0` |
+| 30 | `events.wait.blocking.k_to_k` | Wait for any events (w/ ctx switch) | `235 / 3775` | `235 / 3775` | `0` |
+| 31 | `events.set.wake+ctx.k_to_k` | Set events (w/ ctx switch) | `343 / 5503` | `343 / 5503` | `0` |
+| 32 | `events.wait_all.blocking.k_to_k` | Wait for all events (w/ ctx switch) | `245 / 3920` | `245 / 3920` | `0` |
+| 33 | `events.post.wake+ctx.k_to_k` | Post events (w/ ctx switch) | `352 / 5632` | `352 / 5632` | `0` |
+| 34 | `semaphore.give.immediate.kernel` | Give a semaphore (no waiters) | `37 / 592` | `37 / 592` | `0` |
+| 35 | `semaphore.take.immediate.kernel` | Take a semaphore (no blocking) | `40 / 640` | `40 / 640` | `0` |
+| 36 | `semaphore.take.blocking.k_to_k` | Take a semaphore (context switch) | `215 / 3440` | `215 / 3440` | `0` |
+| 37 | `semaphore.give.wake+ctx.k_to_k` | Give a semaphore (context switch) | `247 / 3967` | `247 / 3967` | `0` |
+| 38 | `condvar.wait.blocking.k_to_k` | Wait for a condvar (context switch) | `272 / 4352` | `272 / 4352` | `0` |
+| 39 | `condvar.signal.wake+ctx.k_to_k` | Signal a condvar (context switch) | `304 / 4864` | `304 / 4864` | `0` |
+| 40 | `stack.push.immediate.kernel` | Add data to k_stack (no ctx switch) | `38 / 623` | `38 / 623` | `0` |
+| 41 | `stack.pop.immediate.kernel` | Get data from k_stack (no ctx switch) | `37 / 607` | `37 / 607` | `0` |
+| 42 | `stack.pop.blocking.k_to_k` | Get data from k_stack (w/ ctx switch) | `224 / 3599` | `224 / 3599` | `0` |
+| 43 | `stack.push.wake+ctx.k_to_k` | Add data to k_stack (w/ ctx switch) | `272 / 4352` | `272 / 4352` | `0` |
+| 44 | `mutex.lock.immediate.recursive.kernel` | Lock a mutex | `48 / 768` | `48 / 768` | `0` |
+| 45 | `mutex.unlock.immediate.recursive.kernel` | Unlock a mutex | `27 / 432` | `27 / 432` | `0` |
+| 46 | `heap.malloc.immediate` | Average time for heap malloc | `291 / 4656` | `291 / 4656` | `0` |
+| 47 | `heap.free.immediate` | Average time for heap free | `350 / 5600` | `350 / 5600` | `0` |
+
+Summary: both native baseline runs reported `47` metrics,
+`PROJECT EXECUTION SUCCESSFUL`, minimum `432 ns`, mean `4019.38 ns` and maximum
+`46703 ns`.
+
 ## AxVisor Long-Sample Comparison
 
 All rows below use the same dual-guest script, same IP/UDP topology, same 1 ms
