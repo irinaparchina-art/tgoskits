@@ -53,6 +53,13 @@ const SAMPLES: [Sample; 8] = [
 ];
 
 const MANUAL_PWM: i32 = 650;
+const INPUTS: usize = 4;
+const HIDDEN: usize = 4;
+const HIDDEN_WEIGHTS: [[i32; INPUTS]; HIDDEN] =
+    [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+const HIDDEN_BIASES: [i32; HIDDEN] = [0, 0, 0, 0];
+const OUTPUT_WEIGHTS: [i32; HIDDEN] = [1, 2, 1, -400];
+const OUTPUT_BIAS: i32 = 0;
 
 fn abs(v: i32) -> i32 {
     if v < 0 { -v } else { v }
@@ -62,17 +69,34 @@ fn plant_output(pwm: i32, s: Sample) -> i32 {
     400 + pwm - 2 * s.load - s.vibration
 }
 
+fn relu(v: i32) -> i32 {
+    v.max(0)
+}
+
+fn dot<const N: usize>(weights: &[i32; N], inputs: &[i32; N]) -> i32 {
+    weights
+        .iter()
+        .zip(inputs.iter())
+        .map(|(weight, input)| weight * input)
+        .sum()
+}
+
 fn infer_pwm(s: Sample) -> i32 {
-    // Direct fixed-point controller that exactly matches the simple plant model used here.
-    s.demand - 400 + 2 * s.load + s.vibration
+    let inputs = [s.demand, s.load, s.vibration, 1];
+    let mut hidden = [0; HIDDEN];
+    for (idx, weights) in HIDDEN_WEIGHTS.iter().enumerate() {
+        hidden[idx] = relu(dot(weights, &inputs) + HIDDEN_BIASES[idx]);
+    }
+    (dot(&OUTPUT_WEIGHTS, &hidden) + OUTPUT_BIAS).clamp(0, 2_000)
 }
 
 fn main() {
     let marker = PREBUILD_MARKER.trim();
 
     println!(
-        "REDCOLA_STARRY_AI_BEGIN guest=StarryOS role=non_rt_guest \
-         model=fixed_point_control_policy samples={} pid={} prebuild_marker={}",
+        "REDCOLA_STARRY_AI_BEGIN guest=StarryOS role=non_rt_guest model=fixed_point_mlp_policy \
+         hidden={} samples={} pid={} prebuild_marker={}",
+        HIDDEN,
         SAMPLES.len(),
         process::id(),
         marker
@@ -101,7 +125,7 @@ fn main() {
         max_ai_error = max_ai_error.max(ai_error);
         println!(
             "REDCOLA_STARRY_AI_SAMPLE seq={} demand={} load={} vibration={} manual_pwm={} \
-             ai_pwm={} manual_error={} ai_error={} infer_us={}",
+             ai_pwm={} manual_error={} ai_error={} nn_infer_us={}",
             idx + 1,
             s.demand,
             s.load,

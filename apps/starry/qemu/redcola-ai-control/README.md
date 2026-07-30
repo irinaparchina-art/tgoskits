@@ -6,7 +6,10 @@ Quancheng Laboratory 2026 AxVisor contest, where StarryOS is preferred over a
 standard Linux non-RT guest.
 
 The guest program compares a fixed manual PWM baseline against a fixed-point
-control policy over eight samples. A successful run prints:
+neural-network control policy over eight samples. The network is intentionally
+tiny and deterministic for reproducibility: a 4-input, 4-hidden-unit ReLU MLP
+computes a PWM command from demand, load, vibration, and bias features before
+the simulated plant reports the tracking error. A successful run prints:
 
 ```text
 REDCOLA_STARRY_AI_CONTROL_PASS samples=8 manual_abs_error=1013 ai_abs_error=0
@@ -50,7 +53,7 @@ freestanding AArch64 C sources with clang. A normal distro-provided
 Latest local QEMU validation:
 
 ```text
-log: /tmp/redcola-starry-ai-qemu-aarch64-release-20260730_032311.log
-sha256: fe10e63f3a64605abc7574e90de8d85ca207d3f71fd212c68c6fb1c333285816
-manual_abs_error=1013 ai_abs_error=0 max_ai_error=0 mean_infer_us=93
+log: /home/kali/qc-evidence/starry-qemu-redcola-ai-control-mlp-20260731_025656/starry-redcola-ai-control-mlp.log
+sha256: b5b16df64a76c141364b75c3c160fa5691c838d9bff3540ce226f3d02f3ea9a5
+manual_abs_error=1013 ai_abs_error=0 max_ai_error=0 mean_infer_us=90
 ```
