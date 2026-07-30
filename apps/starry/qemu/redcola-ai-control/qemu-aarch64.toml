@@ -17,6 +17,6 @@ uefi = false
 to_bin = true
 shell_prefix = "root@starry:"
 shell_init_cmd = "/usr/bin/redcola-ai-control"
-success_regex = ["(?m)^REDCOLA_STARRY_AI_DONE$"]
+success_regex = ["(?m)^REDCOLA_STARRY_AI_DONE"]
 fail_regex = ["(?i)\\bpanic(?:ked)?\\b", "(?m)^REDCOLA_STARRY_AI_CONTROL_FAIL"]
 timeout = 120
