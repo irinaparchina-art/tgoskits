@@ -25,8 +25,8 @@ cargo xtask starry app qemu -t qemu/redcola-ai-control --arch aarch64
 
 The case uses `prebuild.sh` to build a static AArch64 musl binary and copy it to
 the StarryOS rootfs as `/usr/bin/redcola-ai-control`. The QEMU config then runs
-that binary as the shell init command and treats the PASS line as the success
-marker.
+that binary as the shell init command and treats the final DONE line as the
+success marker, after the full PASS metrics line has already been printed.
 
 ## Environment Note
 
