@@ -50,11 +50,13 @@ The wrapper must provide `aarch64-linux-musl-gcc -print-sysroot` and compile
 freestanding AArch64 C sources with clang. A normal distro-provided
 `aarch64-linux-musl-gcc` toolchain can be used instead.
 
-Validation evidence should record the full QEMU log, its SHA-256 digest, and
-the final PASS marker. A passing MLP run contains lines like:
+Validation evidence should record the full QEMU log, its SHA-256 digest, the
+full PASS metrics line, and the final DONE marker used by the QEMU runner. A
+passing MLP run contains lines like:
 
 ```text
 REDCOLA_STARRY_AI_BEGIN guest=StarryOS role=non_rt_guest model=fixed_point_mlp_policy hidden=4
 REDCOLA_STARRY_CONTROL_SUMMARY manual_abs_error=1013 ai_abs_error=0 max_ai_error=0
 REDCOLA_STARRY_AI_CONTROL_PASS samples=8 manual_abs_error=1013 ai_abs_error=0
+REDCOLA_STARRY_AI_DONE
 ```

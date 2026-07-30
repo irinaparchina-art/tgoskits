@@ -153,6 +153,7 @@ fn main() {
             ai_abs_error,
             mean_infer_us
         );
+        println!("REDCOLA_STARRY_AI_DONE");
     } else {
         println!("REDCOLA_STARRY_AI_CONTROL_FAIL");
         process::exit(1);
