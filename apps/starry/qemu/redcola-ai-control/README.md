@@ -50,10 +50,11 @@ The wrapper must provide `aarch64-linux-musl-gcc -print-sysroot` and compile
 freestanding AArch64 C sources with clang. A normal distro-provided
 `aarch64-linux-musl-gcc` toolchain can be used instead.
 
-Latest local QEMU validation:
+Validation evidence should record the full QEMU log, its SHA-256 digest, and
+the final PASS marker. A passing MLP run contains lines like:
 
 ```text
-log: /home/kali/qc-evidence/starry-qemu-redcola-ai-control-mlp-20260731_025656/starry-redcola-ai-control-mlp.log
-sha256: b5b16df64a76c141364b75c3c160fa5691c838d9bff3540ce226f3d02f3ea9a5
-manual_abs_error=1013 ai_abs_error=0 max_ai_error=0 mean_infer_us=90
+REDCOLA_STARRY_AI_BEGIN guest=StarryOS role=non_rt_guest model=fixed_point_mlp_policy hidden=4
+REDCOLA_STARRY_CONTROL_SUMMARY manual_abs_error=1013 ai_abs_error=0 max_ai_error=0
+REDCOLA_STARRY_AI_CONTROL_PASS samples=8 manual_abs_error=1013 ai_abs_error=0
 ```
